@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-16x16.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.ico?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="log,日志," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Logback对log4j进行了大量改进，无论大小。 它们太多了，无法详尽地列举。 然而，这里是从log4j切换到logback的原因的非详尽列表。 请记住，logback在概念上与log4j非常相似，因为两个项目都是由同一个开发人员创建的。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="优先于log4j进行logback的原因">
+<meta property="og:url" content="https://shenbinglife.github.io/2020/04/19/logback%E4%B8%8Elog4j/index.html">
+<meta property="og:site_name" content="ShenBing&#39;s Blog">
+<meta property="og:description" content="Logback对log4j进行了大量改进，无论大小。 它们太多了，无法详尽地列举。 然而，这里是从log4j切换到logback的原因的非详尽列表。 请记住，logback在概念上与log4j非常相似，因为两个项目都是由同一个开发人员创建的。">
+<meta property="article:published_time" content="2020-04-19T15:41:43.356Z">
+<meta property="article:modified_time" content="2018-07-06T13:31:53.000Z">
+<meta property="article:author" content="ShenBing">
+<meta property="article:tag" content="log">
+<meta property="article:tag" content="日志">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://shenbinglife.github.io/2020/04/19/logback与log4j/"/>
+
+
+
+
+
+  <title>优先于log4j进行logback的原因 | ShenBing's Blog</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ShenBing's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">有关于Java、Hadoop、分布式、深度学习</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://shenbinglife.github.io/2020/04/19/logback%E4%B8%8Elog4j/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ShenBing">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://tvax4.sinaimg.cn/large/007S2YVMgy1gdzeybko09j30k10k6whg.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ShenBing's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">优先于log4j进行logback的原因</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-04-19T23:41:43+08:00">
+                2020-04-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/git/" itemprop="url" rel="index">
+                    <span itemprop="name">git</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv">本文总阅读量
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>次
+            </span>
+          
+
+          
+
+          
+              <div class="post-description">
+                  Logback对log4j进行了大量改进，无论大小。 它们太多了，无法详尽地列举。 然而，这里是从log4j切换到logback的原因的非详尽列表。 请记住，logback在概念上与log4j非常相似，因为两个项目都是由同一个开发人员创建的。
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="优先于log4j进行logback的原因"><a href="#优先于log4j进行logback的原因" class="headerlink" title="优先于log4j进行logback的原因"></a>优先于log4j进行logback的原因</h2><p>Logback对log4j进行了大量改进，无论大小。 它们太多了，无法详尽地列举。 然而，这里是从log4j切换到logback的原因的非详尽列表。 请记住，<strong>logback在概念上与log4j非常相似</strong>，因为两个项目都是由同一个开发人员创建的。 如果您已熟悉log4j，您将很快感到宾至如归。 如果你喜欢log4j，你可能会喜欢logback。</p>
+<h3 id="更快的实施"><a href="#更快的实施" class="headerlink" title="更快的实施"></a>更快的实施</h3><p>基于我们之前关于log4j的工作，已经重写了logback内部，以便在某些关键执行路径上执行大约十倍的速度。 不仅logback组件更快，而且内存占用更少。</p>
+<h3 id="大量的测试"><a href="#大量的测试" class="headerlink" title="大量的测试"></a>大量的测试</h3><p>Logback包含了在几年和无数小时工作中开发的大量测试。 虽然log4j也经过测试，但logback将测试带到了完全不同的水平。 在我们看来，这是优先于log4j进行logback的最重要原因。 您希望您的日志框架即使在不利条件下也能够坚如磐石且可靠。</p>
+<h3 id="logback-classic本身就说SLF4J"><a href="#logback-classic本身就说SLF4J" class="headerlink" title="logback-classic本身就说SLF4J"></a>logback-classic本身就说SLF4J</h3><p>由于logback-classic中的<code>Logger</code>类本身实现了SLF4J API，因此在调用带有logback-classic作为底层实现的SLF4J记录器时，会产生零开销。 此外，由于logback-classic强烈鼓励使用SLF4J作为其客户端API，如果需要切换到log4j或jul，可以通过将一个jar文件替换为另一个来实现。 您无需通过SLF4J API触摸代码记录。 这可以大大减少切换日志框架所涉及的工作。</p>
+<h3 id="广泛的文档"><a href="#广泛的文档" class="headerlink" title="广泛的文档"></a>广泛的文档</h3><p>Logback随附详细且不断更新的文档。</p>
+<h3 id="XML或Groovy中的配置文件"><a href="#XML或Groovy中的配置文件" class="headerlink" title="XML或Groovy中的配置文件"></a>XML或Groovy中的配置文件</h3><p>配置logback的传统方法是通过XML文件。 文档中的大多数示例都使用此XML语法。 但是，从logback版本0.9.22开始，也支持<a href="https://translate.googleusercontent.com/translate_c?depth=1&hl=zh-CN&ie=UTF8&prev=_t&rurl=translate.google.com.hk&sl=en&sp=nmt4&tl=zh-CN&u=https://logback.qos.ch/manual/groovy.html&xid=17259,1500004,15700021,15700124,15700149,15700168,15700186,15700190,15700201,15700208&usg=ALkJrhhBWBsoeVYtx0g7jfK3fKP6d6GtYw" target="_blank" rel="noopener">用Groovy编写的配置文件</a> 。 与XML相比，Groovy风格的配置更直观，更一致，并且语法更短。</p>
+<p>还有一个<a href="https://translate.googleusercontent.com/translate_c?depth=1&hl=zh-CN&ie=UTF8&prev=_t&rurl=translate.google.com.hk&sl=en&sp=nmt4&tl=zh-CN&u=http://logback.qos.ch/translator/asGroovy.html&xid=17259,1500004,15700021,15700124,15700149,15700168,15700186,15700190,15700201,15700208&usg=ALkJrhidtWK-Nyj80UQRSXcZmCWOCnUWNQ" target="_blank" rel="noopener">工具可以自动将logback.xml文件迁移到logback.groovy</a> 。</p>
+<h3 id="自动重新加载配置文件"><a href="#自动重新加载配置文件" class="headerlink" title="自动重新加载配置文件"></a>自动重新加载配置文件</h3><p>Logback-classic可以<a href="https://translate.googleusercontent.com/translate_c?depth=1&hl=zh-CN&ie=UTF8&prev=_t&rurl=translate.google.com.hk&sl=en&sp=nmt4&tl=zh-CN&u=https://logback.qos.ch/manual/configuration.html&xid=17259,1500004,15700021,15700124,15700149,15700168,15700186,15700190,15700201,15700208&usg=ALkJrhgRA0DKswZ_dsz-GTjGf9lqf_6q1g#autoScan" target="_blank" rel="noopener">在修改后自动重新加载其配置文件</a> 。 扫描过程快速，无争用，并且动态扩展到数百个线程上每秒数百万次调用。 它在应用程序服务器中也能很好地运行，更常见的是在JEE环境中，因为它不涉及创建单独的扫描线程。</p>
+<h3 id="从I-O故障中顺利恢复"><a href="#从I-O故障中顺利恢复" class="headerlink" title="从I / O故障中顺利恢复"></a>从I / O故障中顺利恢复</h3><p>Logback的<code>FileAppender</code>及其所有子类（包括<code>RollingFileAppender</code> ）可以从I / O故障中正常恢复。 因此，如果文件服务器暂时失败，则不再需要重新启动应用程序以使日志记录再次运行。 一旦文件服务器恢复，相关的logback appender将从之前的错误状态透明地快速恢复。</p>
+<h3 id="自动删除旧的日志存档"><a href="#自动删除旧的日志存档" class="headerlink" title="自动删除旧的日志存档"></a>自动删除旧的日志存档</h3><p>通过设置<a href="https://translate.googleusercontent.com/translate_c?depth=1&hl=zh-CN&ie=UTF8&prev=_t&rurl=translate.google.com.hk&sl=en&sp=nmt4&tl=zh-CN&u=https://logback.qos.ch/manual/appenders.html&xid=17259,1500004,15700021,15700124,15700149,15700168,15700186,15700190,15700201,15700208&usg=ALkJrhjeKCV5-S5P_a0hUMWGkus6yEudeA#TimeBasedRollingPolicy" target="_blank" rel="noopener">TimeBasedRollingPolicy</a>或<a href="https://translate.googleusercontent.com/translate_c?depth=1&hl=zh-CN&ie=UTF8&prev=_t&rurl=translate.google.com.hk&sl=en&sp=nmt4&tl=zh-CN&u=https://logback.qos.ch/manual/appenders.html&xid=17259,1500004,15700021,15700124,15700149,15700168,15700186,15700190,15700201,15700208&usg=ALkJrhjeKCV5-S5P_a0hUMWGkus6yEudeA#SizeAndTimeBasedFNATP" target="_blank" rel="noopener">SizeAndTimeBasedFNATP</a>的maxHistory属性，可以控制最大归档文件数。 如果您的滚动策略要求每月滚动并且您希望保留一年的日志，只需将maxHistory属性设置为12.将自动删除超过12个月的存档日志文件。</p>
+<h3 id="自动压缩存档的日志文件"><a href="#自动压缩存档的日志文件" class="headerlink" title="自动压缩存档的日志文件"></a>自动压缩存档的日志文件</h3><p><a href="https://translate.googleusercontent.com/translate_c?depth=1&hl=zh-CN&ie=UTF8&prev=_t&rurl=translate.google.com.hk&sl=en&sp=nmt4&tl=zh-CN&u=https://logback.qos.ch/manual/appenders.html&xid=17259,1500004,15700021,15700124,15700149,15700168,15700186,15700190,15700201,15700208&usg=ALkJrhjeKCV5-S5P_a0hUMWGkus6yEudeA#RollingFileAppender" target="_blank" rel="noopener">RollingFileAppender</a>可以在翻转期间自动压缩归档日志文件。 压缩始终以异步方式发生，因此即使对于大型日志文件，也不会在压缩期间阻止应用程序。</p>
+<h3 id="谨慎的模式"><a href="#谨慎的模式" class="headerlink" title="谨慎的模式"></a>谨慎的模式</h3><p>在<a href="https://translate.googleusercontent.com/translate_c?depth=1&hl=zh-CN&ie=UTF8&prev=_t&rurl=translate.google.com.hk&sl=en&sp=nmt4&tl=zh-CN&u=https://logback.qos.ch/manual/appenders.html&xid=17259,1500004,15700021,15700124,15700149,15700168,15700186,15700190,15700201,15700208&usg=ALkJrhjeKCV5-S5P_a0hUMWGkus6yEudeA#prudent" target="_blank" rel="noopener">谨慎模式下</a> ，在多个JVM上运行的多个<code>FileAppender</code>实例可以安全地写入同一个日志文件。 由于某些限制，谨慎模式扩展到<code>RollingFileAppender</code> 。</p>
+<h3 id="莉莉丝"><a href="#莉莉丝" class="headerlink" title="莉莉丝"></a>莉莉丝</h3><p><a href="https://translate.googleusercontent.com/translate_c?depth=1&hl=zh-CN&ie=UTF8&prev=_t&rurl=translate.google.com.hk&sl=en&sp=nmt4&tl=zh-CN&u=http://lilith.huxhorn.de/&xid=17259,1500004,15700021,15700124,15700149,15700168,15700186,15700190,15700201,15700208&usg=ALkJrhjVyV4il5u8LBsQiPvWATidvYsK4w" target="_blank" rel="noopener">Lilith</a>是一个用于logback的日志记录和访问事件查看器。 它与log4j的电锯相当，只不过Lilith设计用于处理大量的测井数据而不会退缩。</p>
+<h3 id="条件处理配置文件"><a href="#条件处理配置文件" class="headerlink" title="条件处理配置文件"></a>条件处理配置文件</h3><p>开发人员经常需要在针对不同环境（如开发，测试和生产）的多个logback配置文件之间进行操作。 这些配置文件有很多共同之处，仅在少数几个地方有所不同。 为了避免重复，logback支持在<code>&lt;if&gt;</code> ， <code>&lt;then&gt;</code>和<code>&lt;else&gt;</code>元素的帮助<a href="https://translate.googleusercontent.com/translate_c?depth=1&hl=zh-CN&ie=UTF8&prev=_t&rurl=translate.google.com.hk&sl=en&sp=nmt4&tl=zh-CN&u=https://logback.qos.ch/manual/configuration.html&xid=17259,1500004,15700021,15700124,15700149,15700168,15700186,15700190,15700201,15700208&usg=ALkJrhgRA0DKswZ_dsz-GTjGf9lqf_6q1g#conditional" target="_blank" rel="noopener">下对配置文件</a>进行<a href="https://translate.googleusercontent.com/translate_c?depth=1&hl=zh-CN&ie=UTF8&prev=_t&rurl=translate.google.com.hk&sl=en&sp=nmt4&tl=zh-CN&u=https://logback.qos.ch/manual/configuration.html&xid=17259,1500004,15700021,15700124,15700149,15700168,15700186,15700190,15700201,15700208&usg=ALkJrhgRA0DKswZ_dsz-GTjGf9lqf_6q1g#conditional" target="_blank" rel="noopener">条件处理，</a>以便单个配置文件可以充分地针对多个环境。</p>
+<h3 id="过滤器"><a href="#过滤器" class="headerlink" title="过滤器"></a>过滤器</h3><p>Logback提供了大量的<a href="https://translate.googleusercontent.com/translate_c?depth=1&hl=zh-CN&ie=UTF8&prev=_t&rurl=translate.google.com.hk&sl=en&sp=nmt4&tl=zh-CN&u=https://logback.qos.ch/manual/filters.html&xid=17259,1500004,15700021,15700124,15700149,15700168,15700186,15700190,15700201,15700208&usg=ALkJrhjXLXyblQW4EUGOh2SEJYGGva8UpQ" target="_blank" rel="noopener">过滤功能</a> ，远远超出了log4j所提供的功能。 例如，假设您在生产服务器上部署了业务关键型应用程序。 在处理大量事务的情况下，将日志记录级别设置为WARN，以便仅记录警告和错误。 现在想象一下，您遇到了一个可以在生产系统上重现的错误，但由于这两个环境（生产/测试）之间存在未指定的差异，因此在测试平台上仍然难以捉摸。</p>
+<p>使用log4j，您唯一的选择是将生产系统上的日志记录级别降低到DEBUG以尝试识别问题。 不幸的是，这将产生大量的记录数据，使分析变得困难。 更重要的是，广泛的日志记录会影响应用程序在生产系统上的性能。</p>
+<p>使用logback，您可以选择将所有用户的日志记录保持在WARN级别，除了负责识别问题的一个用户Alice。 当Alice登录时，她将以DEBUG级别登录，而其他用户可以继续登录WARN级别。 这个专长可以通过在配置文件中添加4行XML来实现。 在本手册的<a href="https://translate.googleusercontent.com/translate_c?depth=1&hl=zh-CN&ie=UTF8&prev=_t&rurl=translate.google.com.hk&sl=en&sp=nmt4&tl=zh-CN&u=https://logback.qos.ch/manual/filters.html&xid=17259,1500004,15700021,15700124,15700149,15700168,15700186,15700190,15700201,15700208&usg=ALkJrhjXLXyblQW4EUGOh2SEJYGGva8UpQ#TurboFilter" target="_blank" rel="noopener">相关部分</a>中搜索<code>MDCFilter</code> 。</p>
+<h3 id="SiftingAppender"><a href="#SiftingAppender" class="headerlink" title="SiftingAppender"></a>SiftingAppender</h3><p><a href="https://translate.googleusercontent.com/translate_c?depth=1&hl=zh-CN&ie=UTF8&prev=_t&rurl=translate.google.com.hk&sl=en&sp=nmt4&tl=zh-CN&u=https://logback.qos.ch/manual/appenders.html&xid=17259,1500004,15700021,15700124,15700149,15700168,15700186,15700190,15700201,15700208&usg=ALkJrhjeKCV5-S5P_a0hUMWGkus6yEudeA#SiftingAppender" target="_blank" rel="noopener">SiftingAppender</a>是一个非常多才多艺的appender。 它可用于根据<strong>任何</strong>给定的运行时属性分离（或筛选）日志记录。 例如， <code>SiftingAppender</code>可以根据用户会话分离日志记录事件，以便每个用户生成的日志进入不同的日志文件，每个用户一个日志文件。</p>
+<h3 id="堆栈跟踪包装数据"><a href="#堆栈跟踪包装数据" class="headerlink" title="堆栈跟踪包装数据"></a>堆栈跟踪包装数据</h3><p>当logback打印异常时，堆栈跟踪将包含打包数据。 以下是<a href="https://translate.googleusercontent.com/translate_c?depth=1&hl=zh-CN&ie=UTF8&prev=_t&rurl=translate.google.com.hk&sl=en&sp=nmt4&tl=zh-CN&u=https://logback.qos.ch/demo.html&xid=17259,1500004,15700021,15700124,15700149,15700168,15700186,15700190,15700201,15700208&usg=ALkJrhgu7r6nIUu77LTwIf20ZZjzjfiFWA" target="_blank" rel="noopener">logback-demo</a> Web应用程序生成的示例堆栈跟踪。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">14:28:48.835 [btpool0-7] INFO  c.q.l.demo.prime.PrimeAction - 99 is not a valid value</span><br><span class="line">java.lang.Exception: 99 is invalid</span><br><span class="line">  at ch.qos.logback.demo.prime.PrimeAction.execute(PrimeAction.java:28) [classes&#x2F;:na]</span><br><span class="line">  at org.apache.struts.action.RequestProcessor.processActionPerform(RequestProcessor.java:431) [struts-1.2.9.jar:1.2.9]</span><br><span class="line">  at org.apache.struts.action.RequestProcessor.process(RequestProcessor.java:236) [struts-1.2.9.jar:1.2.9]</span><br><span class="line">  at org.apache.struts.action.ActionServlet.doPost(ActionServlet.java:432) [struts-1.2.9.jar:1.2.9]</span><br><span class="line">  at javax.servlet.http.HttpServlet.service(HttpServlet.java:820) [servlet-api-2.5-6.1.12.jar:6.1.12]</span><br><span class="line">  at org.mortbay.jetty.servlet.ServletHolder.handle(ServletHolder.java:502) [jetty-6.1.12.jar:6.1.12]</span><br><span class="line">  at ch.qos.logback.demo.UserServletFilter.doFilter(UserServletFilter.java:44) [classes&#x2F;:na]</span><br><span class="line">  at org.mortbay.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1115) [jetty-6.1.12.jar:6.1.12]</span><br><span class="line">  at org.mortbay.jetty.servlet.ServletHandler.handle(ServletHandler.java:361) [jetty-6.1.12.jar:6.1.12]</span><br><span class="line">  at org.mortbay.jetty.webapp.WebAppContext.handle(WebAppContext.java:417) [jetty-6.1.12.jar:6.1.12]</span><br><span class="line">  at org.mortbay.jetty.handler.ContextHandlerCollection.handle(ContextHandlerCollection.java:230) [jetty-6.1.12.jar:6.1.12]</span><br></pre></td></tr></table></figure>
+
+<p>从上面可以看出，应用程序正在使用Struts 1.2.9版，并在jetty版本6.1.12下部署。 因此，堆栈跟踪将快速告知读者介入异常的类以及它们所属的包和包版本。 当您的客户向您发送堆栈跟踪时，作为开发人员，您将不再需要让他们向您发送有关他们正在使用的软件包版本的信息。 该信息将成为堆栈跟踪的一部分。 有关详细信息，请参阅<a href="https://translate.googleusercontent.com/translate_c?depth=1&hl=zh-CN&ie=UTF8&prev=_t&rurl=translate.google.com.hk&sl=en&sp=nmt4&tl=zh-CN&u=https://logback.qos.ch/manual/layouts.html&xid=17259,1500004,15700021,15700124,15700149,15700168,15700186,15700190,15700201,15700208&usg=ALkJrhjkuT4YZQccDzgjVm9Kjb6H7iZ0Gg#xThrowable" target="_blank" rel="noopener">“％xThrowable”转换字</a> 。</p>
+<p>对于某些用户错误地认为它是<a href="https://translate.googleusercontent.com/translate_c?depth=1&hl=zh-CN&ie=UTF8&prev=_t&rurl=translate.google.com.hk&sl=en&sp=nmt4&tl=zh-CN&u=http://www.jetbrains.net/devnet/message/5259058&xid=17259,1500004,15700021,15700124,15700149,15700168,15700186,15700190,15700201,15700208&usg=ALkJrhjwlFSVrE_jL1Ln-DJY7gYOFyHG3A" target="_blank" rel="noopener">IDE的</a>一个<a href="https://translate.googleusercontent.com/translate_c?depth=1&hl=zh-CN&ie=UTF8&prev=_t&rurl=translate.google.com.hk&sl=en&sp=nmt4&tl=zh-CN&u=http://www.jetbrains.net/devnet/message/5259058&xid=17259,1500004,15700021,15700124,15700149,15700168,15700186,15700190,15700201,15700208&usg=ALkJrhjwlFSVrE_jL1Ln-DJY7gYOFyHG3A" target="_blank" rel="noopener">功能，</a>这个功能非常有用。</p>
+<h3 id="Logback-access，即带有大脑的HTTP访问日志记录，是logback的一个组成部分"><a href="#Logback-access，即带有大脑的HTTP访问日志记录，是logback的一个组成部分" class="headerlink" title="Logback-access，即带有大脑的HTTP访问日志记录，是logback的一个组成部分"></a>Logback-access，即带有大脑的HTTP访问日志记录，是logback的一个组成部分</h3><p>最后但并非最不重要的是，logback-access模块是logback发行版的一部分，它与Servlet容器（如Jetty或Tomcat）集成，以提供丰富而强大的HTTP访问日志功能。 由于logback-access是初始设计的一部分，因此您喜欢的所有logback-classic功能也可用于logback-access。</p>
+<h3 id="综上所述"><a href="#综上所述" class="headerlink" title="综上所述"></a>综上所述</h3><p>我们列出了一些优先考虑log4j的logback的原因。 鉴于logback建立在我们之前关于log4j的工作上，简单地说，logback只是一个更好的log4j。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="https://tva3.sinaimg.cn/large/007S2YVMgy1gdzh63e589j306m06nt94.jpg" alt="ShenBing 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="https://tva2.sinaimg.cn/large/007S2YVMgy1gdzgz9aoqcj306t06rjrw.jpg" alt="ShenBing 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/log/" rel="tag"># log</a>
+          
+            <a href="/tags/%E6%97%A5%E5%BF%97/" rel="tag"># 日志</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/04/19/Logback/" rel="next" title="Logback">
+                <i class="fa fa-chevron-left"></i> Logback
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/04/19/Logstash%E6%8F%92%E4%BB%B6/" rel="prev" title="Logstash插件">
+                Logstash插件 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjI3OS84ODQz"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="https://tvax4.sinaimg.cn/large/007S2YVMgy1gdzeybko09j30k10k6whg.jpg"
+                alt="ShenBing" />
+            
+              <p class="site-author-name" itemprop="name">ShenBing</p>
+              <p class="site-description motion-element" itemprop="description">唯爱与美食不可辜负</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">31</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">14</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/shenbinglife" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:shenbinglife@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#优先于log4j进行logback的原因"><span class="nav-number">1.</span> <span class="nav-text">优先于log4j进行logback的原因</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#更快的实施"><span class="nav-number">1.1.</span> <span class="nav-text">更快的实施</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#大量的测试"><span class="nav-number">1.2.</span> <span class="nav-text">大量的测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#logback-classic本身就说SLF4J"><span class="nav-number">1.3.</span> <span class="nav-text">logback-classic本身就说SLF4J</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#广泛的文档"><span class="nav-number">1.4.</span> <span class="nav-text">广泛的文档</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#XML或Groovy中的配置文件"><span class="nav-number">1.5.</span> <span class="nav-text">XML或Groovy中的配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自动重新加载配置文件"><span class="nav-number">1.6.</span> <span class="nav-text">自动重新加载配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#从I-O故障中顺利恢复"><span class="nav-number">1.7.</span> <span class="nav-text">从I &#x2F; O故障中顺利恢复</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自动删除旧的日志存档"><span class="nav-number">1.8.</span> <span class="nav-text">自动删除旧的日志存档</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自动压缩存档的日志文件"><span class="nav-number">1.9.</span> <span class="nav-text">自动压缩存档的日志文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#谨慎的模式"><span class="nav-number">1.10.</span> <span class="nav-text">谨慎的模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#莉莉丝"><span class="nav-number">1.11.</span> <span class="nav-text">莉莉丝</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#条件处理配置文件"><span class="nav-number">1.12.</span> <span class="nav-text">条件处理配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#过滤器"><span class="nav-number">1.13.</span> <span class="nav-text">过滤器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SiftingAppender"><span class="nav-number">1.14.</span> <span class="nav-text">SiftingAppender</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#堆栈跟踪包装数据"><span class="nav-number">1.15.</span> <span class="nav-text">堆栈跟踪包装数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Logback-access，即带有大脑的HTTP访问日志记录，是logback的一个组成部分"><span class="nav-number">1.16.</span> <span class="nav-text">Logback-access，即带有大脑的HTTP访问日志记录，是logback的一个组成部分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#综上所述"><span class="nav-number">1.17.</span> <span class="nav-text">综上所述</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ShenBing</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

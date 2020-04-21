@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-16x16.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.ico?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Hibernate Validator 6.0.5.Final （一）前言验证数据是所有应用程序层（从演示文稿到持久层）发生的常见任务。 通常在每个层中实现相同的验证逻辑，这是耗时且容易出错的。 为了避免重复这些验证，开发人员经常将验证逻辑直接捆绑到领域模型中，使用验证代码来混淆领域类，验证代码实际上是关于类本身的元数据。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hibernate Validator 6.0.5.Final （一）">
+<meta property="og:url" content="https://shenbinglife.github.io/2020/04/19/Hibernate%20Validator%206.0.5.Final%20(%E4%B8%80)/index.html">
+<meta property="og:site_name" content="ShenBing&#39;s Blog">
+<meta property="og:description" content="Hibernate Validator 6.0.5.Final （一）前言验证数据是所有应用程序层（从演示文稿到持久层）发生的常见任务。 通常在每个层中实现相同的验证逻辑，这是耗时且容易出错的。 为了避免重复这些验证，开发人员经常将验证逻辑直接捆绑到领域模型中，使用验证代码来混淆领域类，验证代码实际上是关于类本身的元数据。">
+<meta property="og:image" content="https://tva2.sinaimg.cn/large/007S2YVMgy1gdzj1klmqqj30i207sq3q.jpg">
+<meta property="og:image" content="https://tvax4.sinaimg.cn/large/007S2YVMgy1gdzj1qdvcqj30i209mjsh.jpg">
+<meta property="article:published_time" content="2020-04-19T15:41:43.307Z">
+<meta property="article:modified_time" content="2020-04-19T16:11:10.015Z">
+<meta property="article:author" content="ShenBing">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="大数据">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tva2.sinaimg.cn/large/007S2YVMgy1gdzj1klmqqj30i207sq3q.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://shenbinglife.github.io/2020/04/19/Hibernate Validator 6.0.5.Final (一)/"/>
+
+
+
+
+
+  <title>Hibernate Validator 6.0.5.Final （一） | ShenBing's Blog</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ShenBing's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">有关于Java、Hadoop、分布式、深度学习</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://shenbinglife.github.io/2020/04/19/Hibernate%20Validator%206.0.5.Final%20(%E4%B8%80)/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ShenBing">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://tvax4.sinaimg.cn/large/007S2YVMgy1gdzeybko09j30k10k6whg.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ShenBing's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Hibernate Validator 6.0.5.Final （一）</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-04-19T23:41:43+08:00">
+                2020-04-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv">本文总阅读量
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>次
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Hibernate-Validator-6-0-5-Final-（一）"><a href="#Hibernate-Validator-6-0-5-Final-（一）" class="headerlink" title="Hibernate Validator 6.0.5.Final （一）"></a>Hibernate Validator 6.0.5.Final （一）</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>验证数据是所有应用程序层（从演示文稿到持久层）发生的常见任务。 通常在每个层中实现相同的验证逻辑，这是耗时且容易出错的。 为了避免重复这些验证，开发人员经常将验证逻辑直接捆绑到领域模型中，使用验证代码来混淆领域类，验证代码实际上是关于类本身的元数据。</p>
+<a id="more"></a>
+
+<p><img src="https://tva2.sinaimg.cn/large/007S2YVMgy1gdzj1klmqqj30i207sq3q.jpg" alt="image"></p>
+<p>JSR 380 - Bean Validation 2.0 - 为实体和方法验证定义了元数据模型和API。 默认的元数据源是注解，可以通过使用XML覆盖和扩展元数据。 该API不绑定到特定的应用程序层或编程模型。 它特别与Web或持久层无关，可用于服务器端应用程序编程以及富客户端Swing应用程序开发人员。</p>
+<p><img src="https://tvax4.sinaimg.cn/large/007S2YVMgy1gdzj1qdvcqj30i209mjsh.jpg" alt="image"></p>
+<p>Hibernate Validator是JSR 380的参考实现。实现本身以及Bean Validation API和TCK都是在<a href="http://www.apache.org/licenses/LICENSE-2.0" target="_blank" rel="noopener">Apache Software License 2.0</a>下提供和分发的。</p>
+<p>Hibernate Validator 6和Bean Validation 2.0需要Java 8或更高版本。</p>
+<h2 id="1-开始"><a href="#1-开始" class="headerlink" title="1.开始"></a>1.开始</h2><p>本章将向您展示如何开始使用Bean Validation的参考实现（RI）Hibernate Validator。为了以下快速启动，您需要：</p>
+<ul>
+<li>一个JDK 8</li>
+<li><a href="http://maven.apache.org/" target="_blank" rel="noopener">Apache Maven</a></li>
+<li>互联网连接（Maven必须下载所有必需的库）</li>
+</ul>
+<h3 id="1-1。-项目建立"><a href="#1-1。-项目建立" class="headerlink" title="1.1。 项目建立"></a>1.1。 项目建立</h3><p>为了在Maven项目中使用Hibernate Validator，只需将下面的依赖添加到你的<em>pom.xml中</em>：</p>
+<p>例1.1：Hibernate验证器Maven依赖</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.hibernate.validator<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>hibernate-validator<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>6.0.5.Final<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这个传递性的依赖于Bean Validation API（ <code>javax.validation:validation-api:2.0.0.Final</code> ）。</p>
+<h4 id="1-1-1。-统一的EL"><a href="#1-1-1。-统一的EL" class="headerlink" title="1.1.1。 统一的EL"></a>1.1.1。 统一的EL</h4><p>Hibernate Validator需要实现统一表达式语言（ <a href="http://jcp.org/en/jsr/detail?id=341" target="_blank" rel="noopener">JSR 341</a> ）来评估约束违例消息中的动态表达式（参见<a href="#section-message-interpolation">第4.1节“默认消息插值”</a> ）。 当您的应用程序在JBoss AS等Java EE容器中运行时，容器已经提供了一个EL实现。 但是，在Java SE环境中，必须将实现作为依赖项添加到POM文件。 例如，您可以添加以下依赖项来使用JSR 341 <a href="https://javaee.github.io/uel-ri/" target="_blank" rel="noopener">参考实现</a> ：</p>
+<p>例1.2：统一EL参考实现的Maven依赖关系</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.glassfish<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>javax.el<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.0.1-b08<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>**</th>
+<th>对于无法提供EL实现的环境，Hibernate Validator提供了<a href="#non-el-message-interpolator">第12.9节“ <code>ParameterMessageInterpolator</code> ”</a> 。 但是，使用此插补器不符合Bean Validation规范。</th>
+</tr>
+</thead>
+<tbody><tr>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h4 id="1-1-2。-CDI"><a href="#1-1-2。-CDI" class="headerlink" title="1.1.2。 CDI"></a>1.1.2。 CDI</h4><p>Bean Validation定义了CDI的集成点（Contexts and Dependency Injection for Java  EE, <a href="http://jcp.org/en/jsr/detail?id=346" target="_blank" rel="noopener">JSR 346</a> ）。 如果您的应用程序在不提供此集成的环境中运行，您可以通过将以下Maven依赖项添加到您的POM来使用Hibernate Validator CDI可移植扩展：</p>
+<p>例1.3：Hibernate Validator CDI可移植扩展Maven依赖</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.hibernate.validator<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>hibernate-validator-cdi<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>6.0.5.Final<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>请注意，在Java EE应用程序服务器上运行的应用程序通常不需要添加此依赖项。 您可以在<a href="#section-integration-with-cdi">第11.3节“CDI”中</a>了解更多关于Bean Validation和CDI的集成。</p>
+<h4 id="1-1-3。-与安全管理器一起运行"><a href="#1-1-3。-与安全管理器一起运行" class="headerlink" title="1.1.3。 与安全管理器一起运行"></a>1.1.3。 与安全管理器一起运行</h4><p>Hibernate Validator支持在启用<a href="http://docs.oracle.com/javase/8/docs/technotes/guides/security/index.html" target="_blank" rel="noopener">安全管理器的</a>情况下运行。 为此，您必须为Hibernate验证器和Bean验证API代码库分配多个权限。 以下显示了如何通过由Java默认策略实现处理的<a href="http://docs.oracle.com/javase/8/docs/technotes/guides/security/PolicyFiles.html" target="_blank" rel="noopener">策略文件</a>来执行此操作：</p>
+<p>例1.4：使用Hibernate Validator和安全管理器的策略文件</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">grant codeBase <span class="string">"file:path/to/hibernate-validator-6.0.5.Final.jar"</span> &#123;</span><br><span class="line">    permission java.lang.reflect.ReflectPermission <span class="string">"suppressAccessChecks"</span>;</span><br><span class="line">    permission java.lang.RuntimePermission <span class="string">"accessDeclaredMembers"</span>;</span><br><span class="line">    permission java.lang.RuntimePermission <span class="string">"setContextClassLoader"</span>;</span><br><span class="line"></span><br><span class="line">    permission org.hibernate.validator.HibernateValidatorPermission <span class="string">"accessPrivateMembers"</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Only needed when working with XML descriptors (validation.xml or XML constraint mappings)</span></span><br><span class="line">    permission java.util.PropertyPermission <span class="string">"mapAnyUriToUri"</span>, <span class="string">"read"</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">grant codeBase <span class="string">"file:path/to/validation-api-2.0.0.Final.jar"</span> &#123;</span><br><span class="line">    permission java.io.FilePermission <span class="string">"path/to/hibernate-validator-6.0.5.Final.jar"</span>, <span class="string">"read"</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>所有需要特殊权限的API调用都是通过特权操作完成的。 这意味着只有Hibernate Validator和Bean Validation API本身需要列出的权限。 您不需要为调用Hibernate Validator的其他代码库分配任何权限。</p>
+<h4 id="1-1-4。-在WildFly中更新Hibernate验证器"><a href="#1-1-4。-在WildFly中更新Hibernate验证器" class="headerlink" title="1.1.4。 在WildFly中更新Hibernate验证器"></a>1.1.4。 在WildFly中更新Hibernate验证器</h4><p><a href="http://wildfly.org/" target="_blank" rel="noopener">WildFly应用程序服务器</a>包含开箱即用的Hibernate Validator。 为了将Bean Validation API和Hibernate Validator的服务器模块更新到最新，可以使用WildFly的补丁机制。</p>
+<p>您可以使用以下依赖项从<a href="http://sourceforge.net/projects/hibernate/files/hibernate-validator" target="_blank" rel="noopener">SourceForge</a>或Maven Central下载修补程序文件：</p>
+<p>例1.5：Maven依赖于WildFly 11.0.0.Final补丁文件</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.hibernate.validator<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>hibernate-validator-modules<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>6.0.5.Final<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">classifier</span>&gt;</span>wildfly-11.0.0.Final-patch<span class="tag">&lt;/<span class="name">classifier</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">type</span>&gt;</span>zip<span class="tag">&lt;/<span class="name">type</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>我们还为以前版本的WildFly提供了一个补丁：</p>
+<p>例1.6：WildFly 10.1.0.Final补丁文件的Maven依赖关系</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.hibernate.validator<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>hibernate-validator-modules<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>6.0.5.Final<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">classifier</span>&gt;</span>wildfly-10.1.0.Final-patch<span class="tag">&lt;/<span class="name">classifier</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">type</span>&gt;</span>zip<span class="tag">&lt;/<span class="name">type</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>下载了补丁文件后，可以运行以下命令将其应用于WildFly：</p>
+<p>例1.7：应用WildFly补丁</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash">JBOSS_HOME/bin/jboss-cli.sh patch apply hibernate-validator-modules-6.0.5.Final-wildfly-11.0.0.Final-patch.zip</span></span><br></pre></td></tr></table></figure>
+
+<p>如果您想要取消修补程序并返回最初随服务器提供的Hibernate Validator版本，请运行以下命令：</p>
+<p>例1.8：回滚WildFly补丁</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash">JBOSS_HOME/bin/jboss-cli.sh patch rollback --reset-configuration=<span class="literal">true</span></span></span><br></pre></td></tr></table></figure>
+
+<p>一般来说，您可以在<a href="https://developer.jboss.org/wiki/SingleInstallationPatching/" target="_blank" rel="noopener">这里</a>和<a href="http://www.mastertheboss.com/jboss-server/jboss-configuration/managing-wildfly-and-eap-patches" target="_blank" rel="noopener">这里</a>了解更多关于WildFly修补程序的基础结构。</p>
+<h4 id="1-1-5。-在Java-9上运行"><a href="#1-1-5。-在Java-9上运行" class="headerlink" title="1.1.5。 在Java 9上运行"></a>1.1.5。 在Java 9上运行</h4><p>从Hibernate Validator 6.0.5.Final开始，对Java 9和Java平台模块系统（JPMS）的支持就是实验性的。 目前还没有提供JPMS模块描述符，但Hibernate Validator可用作 automatic modules。</p>
+<p>这些是使用<code>Automatic-Module-Name</code>头声明的模块名称 ：</p>
+<ul>
+<li>Bean验证API： <code>java.validation</code></li>
+<li>Hibernate Validator核心： <code>org.hibernate.validator</code></li>
+<li>Hibernate Validator CDI扩展： <code>org.hibernate.validator.cdi</code></li>
+<li>Hibernate Validator测试实用程序： <code>org.hibernate.validator.testutils</code></li>
+<li>Hibernate Validator注解处理器： <code>org.hibernate.validator.annotationprocessor</code></li>
+</ul>
+<p>这些模块名称是初步的，在未来版本中提供真实模块描述符时可能会更改。</p>
+<p>当使用Bean验证XML描述符（ <em>META-INF / validation.xml</em> 和（或）约束映射文件）时，必须启用<code>java.xml.bind</code>模块。 通过追加<code>--add-modules java.xml.bind</code>到你的<em>java</em>调用。</p>
+<table>
+<thead>
+<tr>
+<th>**</th>
+<th>在CDI中使用Hibernate Validator时，请注意不要启用JDK的<code>java.xml.ws.annotation</code>模块。 该模块包含JSR 250 API的一个子集（“Commons Annotations”），但缺少一些注解，如<code>javax.annotation.Priority</code> 。 这会导致Hibernate Validator的方法验证拦截器不被注册，即方法验证将不起作用。<br/><br/>相反，将完整的JSR 250 API添加到未命名模块（即类路径）中，例如通过引入<em>javax.annotation：javax.annotation-api<em>依赖关系（这里已经存在JSR 250 API的依赖关系</em>当依赖 hibernate.validator：hibernate-validator-cdi</em> ）。<br>如果由于某种原因需要启用<code>java.xml.ws.annotation</code>模块，则应使用完整API的内容修补它， 通过附加<code>--patch-module java.xml.ws.annotation=/path/to/complete-jsr250-api.jar</code>到你的<em>java</em>调用。</th>
+</tr>
+</thead>
+<tbody><tr>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h3 id="1-2。-应用约束"><a href="#1-2。-应用约束" class="headerlink" title="1.2。 应用约束"></a>1.2。 应用约束</h3><p>让我们直接看一个例子，看看如何应用约束。</p>
+<p>例1.9：带限制条件的Class Car</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.hibernate.validator.referenceguide.chapter01;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.validation.constraints.Min;</span><br><span class="line"><span class="keyword">import</span> javax.validation.constraints.NotNull;</span><br><span class="line"><span class="keyword">import</span> javax.validation.constraints.Size;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Car</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@NotNull</span></span><br><span class="line">    <span class="keyword">private</span> String manufacturer;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@NotNull</span></span><br><span class="line">    <span class="meta">@Size</span>(min = <span class="number">2</span>, max = <span class="number">14</span>)</span><br><span class="line">    <span class="keyword">private</span> String licensePlate;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Min</span>(<span class="number">2</span>)</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> seatCount;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Car</span><span class="params">(String manufacturer, String licencePlate, <span class="keyword">int</span> seatCount)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.manufacturer = manufacturer;</span><br><span class="line">        <span class="keyword">this</span>.licensePlate = licencePlate;</span><br><span class="line">        <span class="keyword">this</span>.seatCount = seatCount;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//getters and setters ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>@Size</code> <code>@Min</code> ， <code>@Size</code>和<code>@Min</code>注释用于声明应该应用于Car实例字段的约束：</p>
+<ul>
+<li><code>manufacturer</code>绝不能为<code>null</code></li>
+<li><code>licensePlate</code>不能为<code>null</code>且<code>licensePlate</code>必须在2到14个字符之间</li>
+<li><code>seatCount</code>必须至少为2</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>**</th>
+<th>您可以在GitHub上的Hibernate Validator <a href="https://github.com/hibernate/hibernate-validator/tree/master/documentation/src/test" target="_blank" rel="noopener">源代码仓库</a>中找到本参考指南中使用的所有示例的完整源代码。</th>
+</tr>
+</thead>
+<tbody><tr>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h3 id="1-3。-验证约束"><a href="#1-3。-验证约束" class="headerlink" title="1.3。 验证约束"></a>1.3。 验证约束</h3><p>要执行这些约束的验证，请使用<code>Validator</code>实例。 我们来看一下<code>Car</code>的单元测试：</p>
+<p>例1.10：Class CarTest显示验证示例</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.hibernate.validator.referenceguide.chapter01;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.Set;</span><br><span class="line"><span class="keyword">import</span> javax.validation.ConstraintViolation;</span><br><span class="line"><span class="keyword">import</span> javax.validation.Validation;</span><br><span class="line"><span class="keyword">import</span> javax.validation.Validator;</span><br><span class="line"><span class="keyword">import</span> javax.validation.ValidatorFactory;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.junit.BeforeClass;</span><br><span class="line"><span class="keyword">import</span> org.junit.Test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.junit.Assert.assertEquals;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CarTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Validator validator;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@BeforeClass</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">setUpValidator</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();</span><br><span class="line">        validator = factory.getValidator();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">manufacturerIsNull</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Car car = <span class="keyword">new</span> Car( <span class="keyword">null</span>, <span class="string">"DD-AB-123"</span>, <span class="number">4</span> );</span><br><span class="line"></span><br><span class="line">        Set&lt;ConstraintViolation&lt;Car&gt;&gt; constraintViolations =</span><br><span class="line">                validator.validate( car );</span><br><span class="line"></span><br><span class="line">        assertEquals( <span class="number">1</span>, constraintViolations.size() );</span><br><span class="line">        assertEquals( <span class="string">"must not be null"</span>, constraintViolations.iterator().next().getMessage() );</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">licensePlateTooShort</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Car car = <span class="keyword">new</span> Car( <span class="string">"Morris"</span>, <span class="string">"D"</span>, <span class="number">4</span> );</span><br><span class="line"></span><br><span class="line">        Set&lt;ConstraintViolation&lt;Car&gt;&gt; constraintViolations =</span><br><span class="line">                validator.validate( car );</span><br><span class="line"></span><br><span class="line">        assertEquals( <span class="number">1</span>, constraintViolations.size() );</span><br><span class="line">        assertEquals(</span><br><span class="line">                <span class="string">"size must be between 2 and 14"</span>,</span><br><span class="line">                constraintViolations.iterator().next().getMessage()</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">seatCountTooLow</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Car car = <span class="keyword">new</span> Car( <span class="string">"Morris"</span>, <span class="string">"DD-AB-123"</span>, <span class="number">1</span> );</span><br><span class="line"></span><br><span class="line">        Set&lt;ConstraintViolation&lt;Car&gt;&gt; constraintViolations =</span><br><span class="line">                validator.validate( car );</span><br><span class="line"></span><br><span class="line">        assertEquals( <span class="number">1</span>, constraintViolations.size() );</span><br><span class="line">        assertEquals(</span><br><span class="line">                <span class="string">"must be greater than or equal to 2"</span>,</span><br><span class="line">                constraintViolations.iterator().next().getMessage()</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">carIsValid</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Car car = <span class="keyword">new</span> Car( <span class="string">"Morris"</span>, <span class="string">"DD-AB-123"</span>, <span class="number">2</span> );</span><br><span class="line"></span><br><span class="line">        Set&lt;ConstraintViolation&lt;Car&gt;&gt; constraintViolations =</span><br><span class="line">                validator.validate( car );</span><br><span class="line"></span><br><span class="line">        assertEquals( <span class="number">0</span>, constraintViolations.size() );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在<code>setUp()</code>方法中，从<code>ValidatorFactory</code>检索<code>Validator</code>对象。 <code>Validator</code>实例是线程安全的，可以重复使用多次。 因此，它可以安全地存储在一个静态字段中，并在测试方法中用于验证不同的<code>Car</code>实例。</p>
+<p><code>validate()</code>方法返回一组<code>ConstraintViolation</code>实例，您可以遍历该实例以查看发生了哪些验证错误。 前三种测试方法显示了一些预期的约束违规：</p>
+<ul>
+<li><code>manufacturerIsNull()</code>违反了<code>manufacturerIsNull()</code>的<code>@NotNull</code>约束</li>
+<li><code>@Size</code>约束违反了<code>licensePlateTooShort()</code></li>
+<li><code>@Min</code>约束在<code>seatCountTooLow()</code>被违反</li>
+</ul>
+<p>如果对象验证成功， <code>validate()</code>将返回一个空集，如您在<code>carIsValid()</code>看到的。</p>
+<p>请注意，仅使用包<code>javax.validation</code>中的类。 这些是从Javax Bean Validation API提供的。 没有从Hibernate Validator的类直接引用，编写出的代码具有移植性。</p>
+<h3 id="1-4。-下一步该去哪里？"><a href="#1-4。-下一步该去哪里？" class="headerlink" title="1.4。 下一步该去哪里？"></a>1.4。 下一步该去哪里？</h3><p>通过Hibernate验证器和Bean验证的5分钟结束。 继续研究代码示例或查看<a href="#validator-further-reading">第14章“ <em>深入阅读”中</em></a>引用的更多示例。</p>
+<p>要了解更多关于bean和属性的验证，请继续阅读<a href="#chapter-bean-constraints">第2章<em>声明和验证bean约束</em></a> 。 如果您有兴趣使用Bean验证来验证方法的前置和后置条件，请参阅<a href="#chapter-method-constraints">第3章<em>声明和验证方法约束</em></a> 。 如果您的应用程序具有特定的验证要求<a href="#validator-customconstraints">，请<em>参阅*第6章“ *创建自定义约束”</em></a> 。</p>
+<h2 id="2-声明和验证bean约束"><a href="#2-声明和验证bean约束" class="headerlink" title="2.声明和验证bean约束"></a>2.声明和验证bean约束</h2><p>在本章中，您将学习如何<a href="https://translate.googleusercontent.com/translate_c?depth=1&hl=zh-CN&ie=UTF8&prev=_t&rurl=translate.google.co.uk&sl=en&sp=nmt4&tl=zh-CN&u=https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/&usg=ALkJrhgD-MH0gmBhw9uAJj9NkshS0SvLog#section-declaring-bean-constraints" target="_blank" rel="noopener">声明bean</a> （见<a href="https://translate.googleusercontent.com/translate_c?depth=1&hl=zh-CN&ie=UTF8&prev=_t&rurl=translate.google.co.uk&sl=en&sp=nmt4&tl=zh-CN&u=https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/&usg=ALkJrhgD-MH0gmBhw9uAJj9NkshS0SvLog#section-declaring-bean-constraints" target="_blank" rel="noopener">第2.1节“声明bean约束”</a> ）和验证（参见<a href="https://translate.googleusercontent.com/translate_c?depth=1&hl=zh-CN&ie=UTF8&prev=_t&rurl=translate.google.co.uk&sl=en&sp=nmt4&tl=zh-CN&u=https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/&usg=ALkJrhgD-MH0gmBhw9uAJj9NkshS0SvLog#section-validating-bean-constraints" target="_blank" rel="noopener">第2.2节“验证bean约束”</a> ）。 <a href="https://translate.googleusercontent.com/translate_c?depth=1&hl=zh-CN&ie=UTF8&prev=_t&rurl=translate.google.co.uk&sl=en&sp=nmt4&tl=zh-CN&u=https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/&usg=ALkJrhgD-MH0gmBhw9uAJj9NkshS0SvLog#section-builtin-constraints" target="_blank" rel="noopener">第2.3节“内置约束”</a>提供了Hibernate Validator附带的所有内置约束的概述。</p>
+<p>如果您有兴趣将约束应用于方法参数和返回值，请参阅<a href="https://translate.googleusercontent.com/translate_c?depth=1&hl=zh-CN&ie=UTF8&prev=_t&rurl=translate.google.co.uk&sl=en&sp=nmt4&tl=zh-CN&u=https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/&usg=ALkJrhgD-MH0gmBhw9uAJj9NkshS0SvLog#chapter-method-constraints" target="_blank" rel="noopener">第3章<em>声明和验证方法约束</em></a> 。</p>
+<h3 id="2-1。-声明bean约束"><a href="#2-1。-声明bean约束" class="headerlink" title="2.1。 声明bean约束"></a>2.1。 声明bean约束</h3><p>Bean验证中的约束通过Java注解来表达。 在本节中，您将学习如何使用这些注解来增强对象模型。 有四种类型的bean约束：</p>
+<ul>
+<li>field constraints（字段约束）</li>
+<li>property constraints（属性约束）</li>
+<li>container element constraints（容器元素约束，Java泛型元素约束）</li>
+<li>class constraints（类约束）</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>**</th>
+<th>并不是所有的约束都可以放在所有这些层次上。 实际上，Bean Validation定义的默认约束都不能放在类级别。 约束注解中的<code>java.lang.annotation.Target</code>注解本身决定了哪些元素可以放置一个约束。 有关更多信息请参见<a href="#validator-customconstraints">第6章<em>创建自定义约束</em></a> 。</th>
+</tr>
+</thead>
+<tbody><tr>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h4 id="2-1-1。-字段级别约束"><a href="#2-1-1。-字段级别约束" class="headerlink" title="2.1.1。 字段级别约束"></a>2.1.1。 字段级别约束</h4><p>约束可以通过注解一个类的字段来表示。 <a href="">示例2.1“字段级别约束”</a>显示了字段级别的配置示例：</p>
+<p>例2.1：字段约束</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.hibernate.validator.referenceguide.chapter02.fieldlevel;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Car</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@NotNull</span></span><br><span class="line">    <span class="keyword">private</span> String manufacturer;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@AssertTrue</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> isRegistered;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Car</span><span class="params">(String manufacturer, <span class="keyword">boolean</span> isRegistered)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.manufacturer = manufacturer;</span><br><span class="line">        <span class="keyword">this</span>.isRegistered = isRegistered;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//getters and setters...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当使用字段级别约束时，字段访问策略用于访问要验证的值。 这意味着验证引擎直接访问实例变量，即使存在这样的访问器，也不会调用属性访问器方法。</p>
+<p>约束可以应用于任何访问类型（公共，私人等）的字段。 不过，不支持静态字段的约束。</p>
+<table>
+<thead>
+<tr>
+<th>**</th>
+<th>在验证字节码增强对象时，应该使用属性级别约束，因为字节码增强库将无法通过反射来确定字段访问。</th>
+</tr>
+</thead>
+<tbody><tr>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h4 id="2-1-2。-属性级别约束"><a href="#2-1-2。-属性级别约束" class="headerlink" title="2.1.2。 属性级别约束"></a>2.1.2。 属性级别约束</h4><p>如果您的模型类符合<a href="http://www.oracle.com/technetwork/articles/javaee/spec-136004.html" target="_blank" rel="noopener">JavaBean</a>标准，则也可以注释一个bean类的属性，而不是其字段。<a href="">例2.2“属性级约束”</a>使用与<a href="">例2.1“字段级约束”中</a>相同的实体，但是使用属性级约束。</p>
+<p>例子2.2：属性级约束</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.hibernate.validator.referenceguide.chapter02.propertylevel;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Car</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String manufacturer;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> isRegistered;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Car</span><span class="params">(String manufacturer, <span class="keyword">boolean</span> isRegistered)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.manufacturer = manufacturer;</span><br><span class="line">        <span class="keyword">this</span>.isRegistered = isRegistered;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@NotNull</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getManufacturer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> manufacturer;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setManufacturer</span><span class="params">(String manufacturer)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.manufacturer = manufacturer;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@AssertTrue</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isRegistered</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> isRegistered;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setRegistered</span><span class="params">(<span class="keyword">boolean</span> isRegistered)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.isRegistered = isRegistered;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>**</th>
+<th>该属性的getter方法必须被注解，而不是其setter。 这样也可以限制当没有Getter方法时的只读属性。</th>
+</tr>
+</thead>
+<tbody><tr>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<p>使用属性级别约束时，使用属性访问策略访问要验证的值，即验证引擎通过属性访问器方法访问状态。</p>
+<table>
+<thead>
+<tr>
+<th>**</th>
+<th>建议在一个类中使用字段<em>或</em>属性级别注解。 不建议同时注解字段和getter方法，因为这会导致字段被验证两次。</th>
+</tr>
+</thead>
+<tbody><tr>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h4 id="2-1-3。-容器元素约束"><a href="#2-1-3。-容器元素约束" class="headerlink" title="2.1.3。 容器元素约束"></a>2.1.3。 容器元素约束</h4><p>可以直接在泛型化参数的泛型参数中指定约束：这些约束称为容器元素约束。</p>
+<p>这要求在约束定义中通过<code>@Target</code>指定<code>ElementType.TYPE_USE</code> 。 从Bean Validation 2.0开始，内置的Bean Validation以及Hibernate Validator特定的约束指定了<code>ElementType.TYPE_USE</code>的校验注解可以直接在这种情况下使用。</p>
+<p>Hibernate Validator验证在以下标准Java容器上指定的容器元素约束：</p>
+<ul>
+<li><code>java.util.Iterable</code>实现（例如<code>List</code> s， <code>Set</code> s），</li>
+<li><code>java.util.Map</code>实现，支持键和值，</li>
+<li><code>java.util.Optional</code> ， <code>java.util.OptionalInt</code> ， <code>java.util.OptionalDouble</code> ， <code>java.util.OptionalLong</code> ，</li>
+<li>JavaFX的<code>javafx.beans.observable.ObservableValue</code>的各种实现。</li>
+</ul>
+<p>它还支持自定义容器类型的容器元素约束（请参见<a href="#chapter-valueextraction">第7章， <em>值提取</em></a> ）。</p>
+<table>
+<thead>
+<tr>
+<th>**</th>
+<th>在hibernate validator 6之前的版本中，支持容器元素约束的一个子集， 在容器级别需要<code>@Valid</code>注解来启用它们。 从Hibernate Validator 6开始，这不再是必需的。</th>
+</tr>
+</thead>
+<tbody><tr>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<p>下面介绍几个例子，说明各种Java类型的容器元素约束。</p>
+<p>在这些示例中， <code>@ValidPart</code>是一个允许在<code>TYPE_USE</code>上下文中使用的自定义约束。</p>
+<h5 id="2-1-3-1。-使用Iterable"><a href="#2-1-3-1。-使用Iterable" class="headerlink" title="2.1.3.1。 使用Iterable"></a>2.1.3.1。 使用<code>Iterable</code></h5><p>在<code>Iterable</code>类型参数上应用约束时，Hibernate Validator会验证每个元素。 <a href="https://translate.googleusercontent.com/translate_c?depth=1&hl=zh-CN&ie=UTF8&prev=_t&rurl=translate.google.co.uk&sl=en&sp=nmt4&tl=zh-CN&u=https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/&usg=ALkJrhgD-MH0gmBhw9uAJj9NkshS0SvLog#example-container-element-constraints-iterable" target="_blank" rel="noopener">例2.3，“<code>Set</code>上的容器元素约束”</a>显示了一个带有容器元素约束的<code>Set</code>的例子。</p>
+<p>例2.3： <code>Set</code>上的容器元素约束</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.hibernate.validator.referenceguide.chapter02.containerelement.set;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.HashSet;</span><br><span class="line"><span class="keyword">import</span> java.util.Set;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Car</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Set&lt;<span class="meta">@ValidPart</span> String&gt; parts = <span class="keyword">new</span> HashSet&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addPart</span><span class="params">(String part)</span> </span>&#123;</span><br><span class="line">        parts.add( part );</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">Car car = <span class="keyword">new</span> Car();</span><br><span class="line">car.addPart( <span class="string">"Wheel"</span> );</span><br><span class="line">car.addPart( <span class="keyword">null</span> );</span><br><span class="line"></span><br><span class="line">Set&lt;ConstraintViolation&lt;Car&gt;&gt; constraintViolations = validator.validate( car );</span><br><span class="line"></span><br><span class="line">assertEquals( <span class="number">1</span>, constraintViolations.size() );</span><br><span class="line"></span><br><span class="line">ConstraintViolation&lt;Car&gt; constraintViolation =</span><br><span class="line">        constraintViolations.iterator().next();</span><br><span class="line">assertEquals(</span><br><span class="line">        <span class="string">"'null' is not a valid car part."</span>,</span><br><span class="line">        constraintViolation.getMessage()</span><br><span class="line">);</span><br><span class="line">assertEquals( <span class="string">"parts[].&lt;iterable element&gt;"</span>,</span><br><span class="line">        constraintViolation.getPropertyPath().toString() );</span><br></pre></td></tr></table></figure>
+
+<p>请注意属性路径如何明确指出违规来自可迭代元素。</p>
+<h5 id="2-1-3-2。-与List"><a href="#2-1-3-2。-与List" class="headerlink" title="2.1.3.2。 与List"></a>2.1.3.2。 与<code>List</code></h5><p>当在<code>List</code>类型参数上应用约束时，Hibernate Validator会验证每个元素。 <a href="">例2.4，“<code>List</code>上的容器元素约束”</a>显示了一个带容器元素约束的<code>List</code>的例子。</p>
+<p>例2.4： <code>List</code>上的容器元素约束</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.hibernate.validator.referenceguide.chapter02.containerelement.list;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Car</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> List&lt;<span class="meta">@ValidPart</span> String&gt; parts = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addPart</span><span class="params">(String part)</span> </span>&#123;</span><br><span class="line">        parts.add( part );</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">Car car = <span class="keyword">new</span> Car();</span><br><span class="line">car.addPart( <span class="string">"Wheel"</span> );</span><br><span class="line">car.addPart( <span class="keyword">null</span> );</span><br><span class="line"></span><br><span class="line">Set&lt;ConstraintViolation&lt;Car&gt;&gt; constraintViolations = validator.validate( car );</span><br><span class="line"></span><br><span class="line">assertEquals( <span class="number">1</span>, constraintViolations.size() );</span><br><span class="line"></span><br><span class="line">ConstraintViolation&lt;Car&gt; constraintViolation =</span><br><span class="line">        constraintViolations.iterator().next();</span><br><span class="line">assertEquals(</span><br><span class="line">        <span class="string">"'null' is not a valid car part."</span>,</span><br><span class="line">        constraintViolation.getMessage()</span><br><span class="line">);</span><br><span class="line">assertEquals( <span class="string">"parts[1].&lt;list element&gt;"</span>,</span><br><span class="line">        constraintViolation.getPropertyPath().toString() );</span><br></pre></td></tr></table></figure>
+
+<p>在这里，属性路径也包含无效元素的索引。</p>
+<h5 id="2-1-3-3。-与Map"><a href="#2-1-3-3。-与Map" class="headerlink" title="2.1.3.3。 与Map"></a>2.1.3.3。 与<code>Map</code></h5><p>容器元素约束也在Map键和值上进行验证。 <a href="">例2.5，“映射键和值的容器元素约束”</a>显示了一个关于键和值约束的<code>Map</code>的例子。</p>
+<p>例2.5：映射键和值的容器元素约束</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.hibernate.validator.referenceguide.chapter02.containerelement.map;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.validation.constraints.NotNull;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Car</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">enum</span> FuelConsumption &#123;</span><br><span class="line">        CITY,</span><br><span class="line">        HIGHWAY</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Map&lt;<span class="meta">@NotNull</span> FuelConsumption, <span class="meta">@MaxAllowedFuelConsumption</span> Integer&gt; fuelConsumption = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setFuelConsumption</span><span class="params">(FuelConsumption consumption, <span class="keyword">int</span> value)</span> </span>&#123;</span><br><span class="line">        fuelConsumption.put( consumption, value );</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">Car car = <span class="keyword">new</span> Car();</span><br><span class="line">car.setFuelConsumption( Car.FuelConsumption.HIGHWAY, <span class="number">20</span> );</span><br><span class="line"></span><br><span class="line">Set&lt;ConstraintViolation&lt;Car&gt;&gt; constraintViolations = validator.validate( car );</span><br><span class="line"></span><br><span class="line">assertEquals( <span class="number">1</span>, constraintViolations.size() );</span><br><span class="line"></span><br><span class="line">ConstraintViolation&lt;Car&gt; constraintViolation =</span><br><span class="line">        constraintViolations.iterator().next();</span><br><span class="line">assertEquals(</span><br><span class="line">        <span class="string">"20 is outside the max fuel consumption."</span>,</span><br><span class="line">        constraintViolation.getMessage()</span><br><span class="line">);</span><br><span class="line">assertEquals(</span><br><span class="line">        <span class="string">"fuelConsumption[HIGHWAY].&lt;map value&gt;"</span>,</span><br><span class="line">        constraintViolation.getPropertyPath().toString()</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">Car car = <span class="keyword">new</span> Car();</span><br><span class="line">car.setFuelConsumption( <span class="keyword">null</span>, <span class="number">5</span> );</span><br><span class="line"></span><br><span class="line">Set&lt;ConstraintViolation&lt;Car&gt;&gt; constraintViolations = validator.validate( car );</span><br><span class="line"></span><br><span class="line">assertEquals( <span class="number">1</span>, constraintViolations.size() );</span><br><span class="line"></span><br><span class="line">ConstraintViolation&lt;Car&gt; constraintViolation =</span><br><span class="line">        constraintViolations.iterator().next();</span><br><span class="line">assertEquals(</span><br><span class="line">        <span class="string">"must not be null"</span>,</span><br><span class="line">        constraintViolation.getMessage()</span><br><span class="line">);</span><br><span class="line">assertEquals(</span><br><span class="line">        <span class="string">"fuelConsumption&lt;K&gt;[].&lt;map key&gt;"</span>,</span><br><span class="line">        constraintViolation.getPropertyPath().toString()</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>违反约束的属性路径特别有趣：</p>
+<ul>
+<li>无效元素的key包含在属性路径中（在第二个示例中，key为<code>null</code> ）。</li>
+<li>在第一个例子中，违规涉及<code>&lt;map value&gt;</code> ，第二个是<code>&lt;map key&gt;</code> 。</li>
+<li>在第二个例子中，您可能已经注意到泛型参数<code>&lt;K&gt;</code>的存在，稍后会有更多介绍。</li>
+</ul>
+<h5 id="2-1-3-4。-用java-util-Optional"><a href="#2-1-3-4。-用java-util-Optional" class="headerlink" title="2.1.3.4。 用java.util.Optional"></a>2.1.3.4。 用<code>java.util.Optional</code></h5><p>当在<code>Optional</code>的type参数上应用一个约束时，Hibernate Validator会自动打开类型并验证内部值。 <a href="">例2.6，“可选的容器元素约束”</a>显示了带有容器元素约束的可选项。</p>
+<p>示例2.6：可选的容器元素约束</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.hibernate.validator.referenceguide.chapter02.containerelement.optional;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Car</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Optional&lt;<span class="meta">@MinTowingCapacity</span>(<span class="number">1000</span>) Integer&gt; towingCapacity = Optional.empty();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setTowingCapacity</span><span class="params">(Integer alias)</span> </span>&#123;</span><br><span class="line">        towingCapacity = Optional.of( alias );</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">Car car = <span class="keyword">new</span> Car();</span><br><span class="line">car.setTowingCapacity( <span class="number">100</span> );</span><br><span class="line"></span><br><span class="line">Set&lt;ConstraintViolation&lt;Car&gt;&gt; constraintViolations = validator.validate( car );</span><br><span class="line"></span><br><span class="line">assertEquals( <span class="number">1</span>, constraintViolations.size() );</span><br><span class="line"></span><br><span class="line">ConstraintViolation&lt;Car&gt; constraintViolation = constraintViolations.iterator().next();</span><br><span class="line">assertEquals(</span><br><span class="line">        <span class="string">"Not enough towing capacity."</span>,</span><br><span class="line">        constraintViolation.getMessage()</span><br><span class="line">);</span><br><span class="line">assertEquals(</span><br><span class="line">        <span class="string">"towingCapacity"</span>,</span><br><span class="line">        constraintViolation.getPropertyPath().toString()</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>在这里，属性路径只包含属性的名称，因为我们正在考虑将<code>Optional</code> 作为“透明”容器。</p>
+<h5 id="2-1-3-5。-使用自定义容器类型"><a href="#2-1-3-5。-使用自定义容器类型" class="headerlink" title="2.1.3.5。 使用自定义容器类型"></a>2.1.3.5。 使用自定义容器类型</h5><p>容器元素约束也可以用于自定义容器。</p>
+<p>必须为自定义类型注册<code>ValueExtractor</code> ，以允许检索要验证的值（有关如何实现自己的<code>ValueExtractor</code>以及如何注册的更多信息，请参阅<a href="#chapter-valueextraction">第7章， <em>值提取</em></a> ）。</p>
+<p><a href="">例2.7，“自定义容器类型的容器元素约束”</a>显示了一个具有泛型参数约束的自定义泛型类型。</p>
+<p>例2.7：自定义容器类型的容器元素约束</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.hibernate.validator.referenceguide.chapter02.containerelement.custom;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Car</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> GearBox&lt;<span class="meta">@MinTorque</span>(<span class="number">100</span>) Gear&gt; gearBox;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setGearBox</span><span class="params">(GearBox&lt;Gear&gt; gearBox)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.gearBox = gearBox;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">package</span> org.hibernate.validator.referenceguide.chapter02.containerelement.custom;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GearBox</span>&lt;<span class="title">T</span> <span class="keyword">extends</span> <span class="title">Gear</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> T gear;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">GearBox</span><span class="params">(T gear)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.gear = gear;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Gear <span class="title">getGear</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.gear;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.hibernate.validator.referenceguide.chapter02.containerelement.custom;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Gear</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Integer torque;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Gear</span><span class="params">(Integer torque)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.torque = torque;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Integer <span class="title">getTorque</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> torque;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">AcmeGear</span> <span class="keyword">extends</span> <span class="title">Gear</span> </span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">AcmeGear</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">super</span>( <span class="number">100</span> );</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.hibernate.validator.referenceguide.chapter02.containerelement.custom;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GearBoxValueExtractor</span> <span class="keyword">implements</span> <span class="title">ValueExtractor</span>&lt;<span class="title">GearBox</span>&lt;@<span class="title">ExtractedValue</span> ?&gt;&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">extractValues</span><span class="params">(GearBox&lt;@ExtractedValue ?&gt; originalValue, ValueExtractor.ValueReceiver receiver)</span> </span>&#123;</span><br><span class="line">        receiver.value( <span class="keyword">null</span>, originalValue.getGear() );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">Car car = <span class="keyword">new</span> Car();</span><br><span class="line">car.setGearBox( <span class="keyword">new</span> GearBox&lt;&gt;( <span class="keyword">new</span> Gear.AcmeGear() ) );</span><br><span class="line"></span><br><span class="line">Set&lt;ConstraintViolation&lt;Car&gt;&gt; constraintViolations = validator.validate( car );</span><br><span class="line">assertEquals( <span class="number">1</span>, constraintViolations.size() );</span><br><span class="line"></span><br><span class="line">ConstraintViolation&lt;Car&gt; constraintViolation =</span><br><span class="line">        constraintViolations.iterator().next();</span><br><span class="line">assertEquals(</span><br><span class="line">        <span class="string">"Gear is not providing enough torque."</span>,</span><br><span class="line">        constraintViolation.getMessage()</span><br><span class="line">);</span><br><span class="line">assertEquals(</span><br><span class="line">        <span class="string">"gearBox"</span>,</span><br><span class="line">        constraintViolation.getPropertyPath().toString()</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-1-3-6。-嵌套的容器元素"><a href="#2-1-3-6。-嵌套的容器元素" class="headerlink" title="2.1.3.6。 嵌套的容器元素"></a>2.1.3.6。 嵌套的容器元素</h5><p>嵌套的容器元素也支持约束。</p>
+<p>在<a href="https://translate.googleusercontent.com/translate_c?depth=1&hl=zh-CN&ie=UTF8&prev=_t&rurl=translate.google.co.uk&sl=en&sp=nmt4&tl=zh-CN&u=https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/&usg=ALkJrhgD-MH0gmBhw9uAJj9NkshS0SvLog#example-container-element-nested" target="_blank" rel="noopener">例2.8“嵌套容器元素</a>约束条件中验证<code>Car</code>对象时， <code>Part</code>和<code>Manufacturer</code>上的<code>@NotNull</code>约束条件都将被强制执行。</p>
+<p>例子2.8：嵌套的容器元素的约束</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.hibernate.validator.referenceguide.chapter02.containerelement.nested;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.validation.constraints.NotNull;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Car</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Map&lt;<span class="meta">@NotNull</span> Part, List&lt;<span class="meta">@NotNull</span> Manufacturer&gt;&gt; partManufacturers =</span><br><span class="line">            <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-1-4。-类级别约束"><a href="#2-1-4。-类级别约束" class="headerlink" title="2.1.4。 类级别约束"></a>2.1.4。 类级别约束</h4><p>最后但并非最不重要的，还可以在类上设置一个约束。 在这种情况下，单个属性并不是验证的目标，而是完整的对象。 如果验证依赖于对象的多个属性之间的相关性，则类级约束是有用的。</p>
+<p><a href="">例2.9中的类级别约束“</a> <code>Car</code>具有<code>seatCount</code>和<code>passengers</code>这两个属性，应该确保乘客名单没有比可用座位更多的条目。 为此， <code>@ValidPassengerCount</code>约束被添加到类级别上。 该约束的验证者可以访问完整的<code>Car</code>对象，从而可以比较座位和乘客的数量。</p>
+<p>请参阅<a href="#section-class-level-constraints">第6.2节“类级约束”</a>以详细了解如何实现此自定义约束。</p>
+<p>例2.9：类级约束</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.hibernate.validator.referenceguide.chapter02.classlevel;</span><br><span class="line"></span><br><span class="line"><span class="meta">@ValidPassengerCount</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Car</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> seatCount;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> List&lt;Person&gt; passengers;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-1-5。-约束继承"><a href="#2-1-5。-约束继承" class="headerlink" title="2.1.5。 约束继承"></a>2.1.5。 约束继承</h4><p>当一个类实现了一个接口或者扩展了另一个类的时候，在父类型上声明的所有约束注解的应用方式与在类本身上指定的约束相同。 为了使事情更清晰，让我们看看下面的例子：</p>
+<p>例2.10：约束继承</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.hibernate.validator.referenceguide.chapter02.inheritance;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Car</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String manufacturer;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@NotNull</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getManufacturer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> manufacturer;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.hibernate.validator.referenceguide.chapter02.inheritance;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RentalCar</span> <span class="keyword">extends</span> <span class="title">Car</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String rentalStation;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@NotNull</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getRentalStation</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> rentalStation;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在这里类<code>RentalCar</code>是<code>Car</code>一个子类，并添加属性<code>rentalStation</code> 。 如果<code>RentalCar</code>的实例被验证，则不仅会校验<code>rentalStation</code>的<code>@NotNull</code>约束，还会对父类的<code>manufacturer</code>的约束进行校验。</p>
+<p>如果<code>Car</code>不是超类，而是由<code>RentalCar</code>实现的接口，情况如上相同 。</p>
+<p>如果方法被覆盖，约束注解将被聚合。 因此，如果<code>RentalCar</code>覆盖了<code>Car</code>的<code>getManufacturer()</code>方法，则除了超类的<code>@NotNull</code>约束之外，还会校验在重写方法中注解的任何约束。</p>
+<h4 id="2-1-6。-对象级联校验"><a href="#2-1-6。-对象级联校验" class="headerlink" title="2.1.6。 对象级联校验"></a>2.1.6。 对象级联校验</h4><p>Bean验证API不仅允许验证一个类的实例，也能实现完整的对象关联校验（级联验证）。为了实现级联校验，只要在字段或属性上增加注解<code>@Valid</code>。<a href="">2.11，“级联验证”</a>。</p>
+<p>实施例2.11：级联验证</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.hibernate.validator.referenceguide.chapter02.objectgraph;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Car</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@NotNull</span></span><br><span class="line">    <span class="meta">@Valid</span></span><br><span class="line">    <span class="keyword">private</span> Person driver;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.hibernate.validator.referenceguide.chapter02.objectgraph;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@NotNull</span></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果实例<code>Car</code>被验证，被引用的<code>Person</code>对象也将被验证，因为<code>driver</code>字段被<code>@Valid</code>注解。因此<code>Person</code>的name为null，Car的校验也会失败。</p>
+<p>对象关联的验证是递归的，也就是说，如果对级联验证点标记的对象本身具有有<code>@Valid</code>注解的属性，则这些引用也将由验证引擎跟踪。验证引擎将确保在级联验证期间不会出现无限循环，例如，如果两个对象互相持有引用。</p>
+<p>需要注意的是<code>null</code>值在级联验证过程中被忽略。</p>
+<p>作为约束条件，对象关联的验证也适用于容器的元素。这意味着可以对任意泛型参数的泛型类型使用<code>@Valid</code>，这将导致父对象被校验时每个容器内的元素被校验。</p>
+<table>
+<thead>
+<tr>
+<th>**</th>
+<th>级联验证还支持约束嵌套容器内的元素。</th>
+</tr>
+</thead>
+<tbody><tr>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<p>实施例2.12：容器的级联验证</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.hibernate.validator.referenceguide.chapter02.objectgraph.containerelement;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Car</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> List&lt;<span class="meta">@NotNull</span> <span class="meta">@Valid</span> Person&gt; passengers = <span class="keyword">new</span> ArrayList&lt;Person&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Map&lt;<span class="meta">@Valid</span> Part, List&lt;<span class="meta">@Valid</span> Manufacturer&gt;&gt; partManufacturers = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.hibernate.validator.referenceguide.chapter02.objectgraph.containerelement;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Part</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@NotNull</span></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.hibernate.validator.referenceguide.chapter02.objectgraph.containerelement;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Manufacturer</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@NotNull</span></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当验证的实例<code>Car</code>中所示的类<a href="">实施例2.12，“级联容器的验证”</a>，一个<code>ConstraintViolation</code>将被创建：</p>
+<ul>
+<li>如果任何的<code>Person</code>对象有一个<code>null</code>名称;</li>
+<li>如果任何Map中的<code>Part</code>对象有一个<code>null</code>名称;</li>
+<li>如果任何的<code>Manufacturer</code>对象有一个<code>null</code>名字。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>**</th>
+<th>在之前的6个版本，Hibernate验证支持的级联验证的容器元素的子集，它是在容器级别实现的（例如，你会用<code>@Valid private List&lt;Person&gt;</code>启用级联验证<code>Person</code>）。这仍然是支持，但不建议使用。请使用容器元素级别<code>@Valid</code>的注解，因为它更具表现力。</th>
+</tr>
+</thead>
+<tbody><tr>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h3 id="2-2。-验证Bean约束"><a href="#2-2。-验证Bean约束" class="headerlink" title="2.2。 验证Bean约束"></a>2.2。 验证Bean约束</h3><p><code>Validator</code>接口在Bean验证中最重要的对象。下一节将展示如何获取一个<code>Validator</code>实例。之后，您将学习如何使用<code>Validator</code>接口中的不同的方法。</p>
+<h4 id="2-2-1。-获取Validator实例"><a href="#2-2-1。-获取Validator实例" class="headerlink" title="2.2.1。 获取Validator实例"></a>2.2.1。 获取<code>Validator</code>实例</h4><p>校验对象实例的第一步是获取一个<code>Validator</code>实例。实现这个的过程，就是通过<code>Validation</code>类和<code>ValidatorFactory</code>。最简单的方法是使用静态方法<code>Validation#buildDefaultValidatorFactory()</code>：</p>
+<p>实施例2.13： <code>Validation#buildDefaultValidatorFactory()</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ValidatorFactory factory = Validation.buildDefaultValidatorFactory();</span><br><span class="line">validator = factory.getValidator();</span><br></pre></td></tr></table></figure>
+
+<p>这个启动步骤可以创建一个默认配置的验证器。请参阅<a href="#chapter-bootstrapping">第9章，<em>引导</em></a>更多地了解不同的引导方法和如何获得特定配置的<code>Validator</code>实例。</p>
+<h4 id="2-2-2。-验证方法"><a href="#2-2-2。-验证方法" class="headerlink" title="2.2.2。 验证方法"></a>2.2.2。 验证方法</h4><p><code>Validator</code>接口包含验证整个实体或实体单一属性的三种方法。</p>
+<p>这三种方法返回<code>Set&lt;ConstraintViolation&gt;</code>。如果<code>Set&lt;ConstraintViolation&gt;</code>为空，则验证成功。否则一个<code>ConstraintViolation</code>实例中添加了每个违反约束。</p>
+<p>在执行校验时，所有的验证方法都有方法参数来约定校验分组。如果未指定参数，则默认验证组（<code>javax.validation.groups.Default</code>使用）。验证组的主题进行了详细讨论<a href="#chapter-groups">第5章，<em>分组的约束</em></a>。</p>
+<h5 id="2-2-2-1。-Validator-validate"><a href="#2-2-2-1。-Validator-validate" class="headerlink" title="2.2.2.1。 Validator#validate()"></a>2.2.2.1。 <code>Validator#validate()</code></h5><p>使用<code>validate()</code>方法执行给定的bean的所有约束验证。<a href="">例2.14，“使用<code>Validator#validate()</code>”</a>展示了例2.2属性校验的代码，其不能满足该<code>@NotNull</code>上约束<code>manufacturer</code>属性。因此，验证调用返回一个<code>ConstraintViolation</code>对象。</p>
+<p>例如2.14：使用 <code>Validator#validate()</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Car car = <span class="keyword">new</span> Car( <span class="keyword">null</span>, <span class="keyword">true</span> );</span><br><span class="line"></span><br><span class="line">Set&lt;ConstraintViolation&lt;Car&gt;&gt; constraintViolations = validator.validate( car );</span><br><span class="line"></span><br><span class="line">assertEquals( <span class="number">1</span>, constraintViolations.size() );</span><br><span class="line">assertEquals( <span class="string">"must not be null"</span>, constraintViolations.iterator().next().getMessage() );</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-2-2-2。-Validator-validateProperty"><a href="#2-2-2-2。-Validator-validateProperty" class="headerlink" title="2.2.2.2。 Validator#validateProperty()"></a>2.2.2.2。 <code>Validator#validateProperty()</code></h5><p>使用<code>validateProperty()</code>，你可以验证一个给定对象的指定名称的属性。属性名称必须符合JavaBeans的规范。</p>
+<p>例如2.15：使用 <code>Validator#validateProperty()</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Car car = <span class="keyword">new</span> Car( <span class="keyword">null</span>, <span class="keyword">true</span> );</span><br><span class="line"></span><br><span class="line">Set&lt;ConstraintViolation&lt;Car&gt;&gt; constraintViolations = validator.validateProperty(</span><br><span class="line">        car,</span><br><span class="line">        <span class="string">"manufacturer"</span></span><br><span class="line">);</span><br><span class="line"></span><br><span class="line">assertEquals( <span class="number">1</span>, constraintViolations.size() );</span><br><span class="line">assertEquals( <span class="string">"must not be null"</span>, constraintViolations.iterator().next().getMessage() );</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-2-2-3。-Validator-validateValue"><a href="#2-2-2-3。-Validator-validateValue" class="headerlink" title="2.2.2.3。 Validator#validateValue()"></a>2.2.2.3。 <code>Validator#validateValue()</code></h5><p>通过使用该<code>validateValue()</code>方法，您对校验指定对象的属性赋予指定的值，判断是否能校验通过：</p>
+<p>实施例2.16：使用 <code>Validator#validateValue()</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Set&lt;ConstraintViolation&lt;Car&gt;&gt; constraintViolations = validator.validateValue(</span><br><span class="line">        Car<span class="class">.<span class="keyword">class</span>,</span></span><br><span class="line">        "manufacturer",</span><br><span class="line">        <span class="keyword">null</span></span><br><span class="line">);</span><br><span class="line"></span><br><span class="line">assertEquals( <span class="number">1</span>, constraintViolations.size() );</span><br><span class="line">assertEquals( <span class="string">"must not be null"</span>, constraintViolations.iterator().next().getMessage() );</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>**</th>
+<th><code>@Valid</code>不会被触发<code>validateProperty()</code>或<code>validateValue()</code>。</th>
+</tr>
+</thead>
+<tbody><tr>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<p><code>Validator#validateProperty()</code>例如在集成Bean验证的成JSF 2中使用（见<a href="#section-presentation-layer">第11.2节，“JSF＆Seam”</a>），校验那些在表单中的属性值，但是尚未被传入模型对象之前。</p>
+<h4 id="2-2-3。-ConstraintViolation"><a href="#2-2-3。-ConstraintViolation" class="headerlink" title="2.2.3。 ConstraintViolation"></a>2.2.3。 <code>ConstraintViolation</code></h4><h5 id="2-2-3-1。ConstraintViolation方法"><a href="#2-2-3-1。ConstraintViolation方法" class="headerlink" title="2.2.3.1。ConstraintViolation方法"></a>2.2.3.1。<code>ConstraintViolation</code>方法</h5><p>现在是时候细看<code>ConstraintViolation</code>。使用<code>ConstraintViolation</code>中不同的方法可以获得很多有关验证失败的原因的有用信息。下面给出了这些方法的概述。下面示例中错误信息的值参考自<a href="">例2.14，“使用<code>Validator#validate()</code>”</a>。</p>
+<ul>
+<li><p><code>getMessage()</code></p>
+<p>插值后的错误信息</p>
+<p>“must not be null”</p>
+</li>
+<li><p><code>getMessageTemplate()</code></p>
+<p>尚未插值的错误信息字符串</p>
+<p>“{… NotNull.message}”</p>
+</li>
+<li><p><code>getRootBean()</code></p>
+<p>最顶层被校验的对象</p>
+<p>car</p>
+</li>
+<li><p><code>getRootBeanClass()</code></p>
+<p>顶层被校验的对象的类</p>
+<p><code>Car.class</code></p>
+</li>
+<li><p><code>getLeafBean()</code></p>
+<p>如果一个bean约束，返回bean的实例; 如果一个属性约束，则返回托管属性的bean实例的</p>
+</li>
+<li><p><code>getPropertyPath()</code></p>
+<p>属性路径从根bean的到被校验的对象</p>
+<p>返回一个节点<code>PROPERTY</code>，并命名为“manufacturer”</p>
+</li>
+<li><p><code>getInvalidValue()</code></p>
+<p>返回未通过校验的值</p>
+</li>
+<li><p><code>getConstraintDescriptor()</code></p>
+<p>返回校验约束的元数据</p>
+<p><code>@NotNull</code></p>
+</li>
+</ul>
+<h5 id="2-2-3-2。-利用属性路径"><a href="#2-2-3-2。-利用属性路径" class="headerlink" title="2.2.3.2。 利用属性路径"></a>2.2.3.2。 利用属性路径</h5><p>为了确定触发约束的元素，你需要使用<code>getPropertyPath()</code>的方法确定约束元素的路径。</p>
+<p>返回的<code>Path</code>是校验元素表示的<code>Node</code> 的路径组成的。</p>
+<p><code>Path</code>和各种类型的<code>Node</code>的详细信息参考<code>ConstraintViolation</code>部分。</p>
+<h3 id="2-3。-内置的约束"><a href="#2-3。-内置的约束" class="headerlink" title="2.3。 内置的约束"></a>2.3。 内置的约束</h3><p>Hibernate验证包括一组基本的通用的约束。这些是最重要的由Bean验证规范中定义的约束条件（见<a href="#validator-defineconstraints-spec">第2.3.1节“Bean验证约束”</a>）。此外，Hibernate验证提供了有用的自定义约束条件（见<a href="#validator-defineconstraints-hv-constraints">第2.3.2节“附加约束”</a>）。</p>
+<h4 id="2-3-1。-Bean验证约束"><a href="#2-3-1。-Bean验证约束" class="headerlink" title="2.3.1。 Bean验证约束"></a>2.3.1。 Bean验证约束</h4><p>下面可以找到所有的Bean Validation API定义的约束。所有这些约束只能在字段或属性上使用，没有支持类级别的校验约束。如果你使用了Hibernate ORM，一些约束可以直接在DDL模型操作时使用。</p>
+<table>
+<thead>
+<tr>
+<th>**</th>
+<th>Hibernate验证允许一些限制约束超出标准的校验规范（例如<code>@Max</code>可应用于字符串）。依托这个功能会影响Bean验证提供者之间的应用程序的可移植性。</th>
+</tr>
+</thead>
+<tbody><tr>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<ul>
+<li><p><code>@AssertFalse</code></p>
+<p>检查被注解的元素是假的。支持的数据类型<code>Boolean</code> ， <code>boolean</code>。 Hibernate的元数据影响没有</p>
+</li>
+<li><p><code>@AssertTrue</code></p>
+<p>检查被注解的元素是真实的。支持的数据类型<code>Boolean</code> ， <code>boolean</code>。 Hibernate的元数据影响没有</p>
+</li>
+<li><p><code>@DecimalMax(value=, inclusive=)</code></p>
+<p>检查被注解的值是否小于规定的最大值，当<code>inclusive</code>=false。否则，校验该值是否小于或等于指定的最大值。参数值是根据所述最大值的字符串表示<code>BigDecimal</code>字符串表示。支持的数据类型<code>BigDecimal</code>，<code>BigInteger</code>，<code>CharSequence</code>，<code>byte</code>，<code>short</code>，<code>int</code>，<code>long</code>和原始类型的相应的包装; 通过HV另外支持：任何<code>Number</code>和<code>javax.money.MonetaryAmount</code>的子类（如果<a href="">JSR 354 API</a>在项目中被引入）。Hibernate的元数据影响没有</p>
+</li>
+<li><p><code>@DecimalMin(value=, inclusive=)</code></p>
+<p>检查注释的值是否大于指定的最小值，当较大<code>inclusive</code>=false。否则判断该值是否大于或等于指定的最小值。参数值是根据所述最小值的字符串表示<code>BigDecimal</code>字符串表示。支持的数据类型<code>BigDecimal</code>，<code>BigInteger</code>，<code>CharSequence</code>，<code>byte</code>，<code>short</code>，<code>int</code>，<code>long</code>和原始类型的相应的包装; 通过HV另外支持：任何<code>Number</code>和<code>javax.money.MonetaryAmount</code>的子类。Hibernate的元数据影响没有</p>
+</li>
+<li><p><code>@Digits(integer=, fraction=)</code></p>
+<p>检查注释的值的整数位数是否到达<code>integer</code>大小和小数位数是否到达<code>fraction</code>。支持的数据类型<code>BigDecimal</code>，<code>BigInteger</code>，<code>CharSequence</code>，<code>byte</code>，<code>short</code>，<code>int</code>，<code>long</code>和原始类型的相应的包装; 通过HV另外支持：任何<code>Number</code>的子类型。Hibernate的元数据影响：定义数据库列的精度和规模（precision and scale）</p>
+</li>
+<li><p><code>@Email</code></p>
+<p>检查指定的字符序列是否是一个有效的电子邮件地址。可选参数<code>regexp</code>和<code>flags</code>允许指定附加的正则表达式（包括正则表达式标志）。支持的数据类型<code>CharSequence</code>。 Hibernate的元数据影响没有</p>
+</li>
+<li><p><code>@Future</code></p>
+<p>检查注释的日期是否在将来。支持的数据类型<code>java.util.Date</code>，<code>java.util.Calendar</code>，<code>java.time.Instant</code>，<code>java.time.LocalDate</code>，<code>java.time.LocalDateTime</code>，<code>java.time.LocalTime</code>，<code>java.time.MonthDay</code>，<code>java.time.OffsetDateTime</code>，<code>java.time.OffsetTime</code>，<code>java.time.Year</code>，<code>java.time.YearMonth</code>，<code>java.time.ZonedDateTime</code>，<code>java.time.chrono.HijrahDate</code>，<code>java.time.chrono.JapaneseDate</code>，<code>java.time.chrono.MinguoDate</code>，<code>java.time.chrono.ThaiBuddhistDate</code>; 通过HV另外的支持，如果<a href="">Joda Time</a>的日期/时间API被引入类路径：那么任何<code>ReadablePartial</code>和<code>ReadableInstant</code>的实现类都会支持。Hibernate的元数据影响没有</p>
+</li>
+<li><p><code>@FutureOrPresent</code></p>
+<p>检查注释的日期是否在当前或将来。支持的数据类型<code>java.util.Date</code>，<code>java.util.Calendar</code>，<code>java.time.Instant</code>，<code>java.time.LocalDate</code>，<code>java.time.LocalDateTime</code>，<code>java.time.LocalTime</code>，<code>java.time.MonthDay</code>，<code>java.time.OffsetDateTime</code>，<code>java.time.OffsetTime</code>，<code>java.time.Year</code>，<code>java.time.YearMonth</code>，<code>java.time.ZonedDateTime</code>，<code>java.time.chrono.HijrahDate</code>，<code>java.time.chrono.JapaneseDate</code>，<code>java.time.chrono.MinguoDate</code>，<code>java.time.chrono.ThaiBuddhistDate</code>; 通过HV另外的支持，如果<a href="">Joda Time</a>的日期/时间API被引入类路径：那么任何<code>ReadablePartial</code>和<code>ReadableInstant</code>的实现类都会支持。Hibernate的元数据影响没有</p>
+</li>
+<li><p><code>@Max(value=)</code></p>
+<p>检查注释的值是否小于或等于指定的最大值。支持的数据类型<code>BigDecimal</code>，<code>BigInteger</code>，<code>byte</code>，<code>short</code>，<code>int</code>，<code>long</code>和原始类型的相应的包装; 通过HV另外支持：任何的<code>CharSequence</code>（可以被转为数字的字符串），<code>Number</code>和<code>javax.money.MonetaryAmount</code>的子类型。Hibernate的元数据影响：添加列检查约束</p>
+</li>
+<li><p><code>@Min(value=)</code></p>
+<p>检查注释的值是否大于或等于规定的最小值。支持的数据类型<code>BigDecimal</code>，<code>BigInteger</code>，<code>byte</code>，<code>short</code>，<code>int</code>，<code>long</code>和原始类型的相应的包装; 通过HV另外支持：任何的<code>CharSequence</code>（可以被转为数字的字符串），<code>Number</code>和<code>javax.money.MonetaryAmount</code>的子类型。Hibernate的元数据影响：添加列检查约束</p>
+</li>
+<li><p><code>@NotBlank</code></p>
+<p>检查该被注解的字符序列不为null且长度是大于0。与<code>@NotEmpty</code>不同的是，这个约束只可用于字符序列，并且尾部空格都被忽略。支持的数据类型<code>CharSequence</code>。 Hibernate的元数据影响没有</p>
+</li>
+<li><p><code>@NotEmpty</code></p>
+<p>检查注释元素是否不为null，也不是空字符串。支持的数据类型<code>CharSequence</code>，<code>Collection</code>，<code>Map</code>和数组。Hibernate的元数据影响没有</p>
+</li>
+<li><p><code>@NotNull</code></p>
+<p>检查批注的值不为 <code>null</code>。支持的数据类型：任何类型。Hibernate的元数据影响：定义列不可为空</p>
+</li>
+<li><p><code>@Negative</code></p>
+<p>检查该元素是严格为负。零值被视为非法。支持的数据类型<code>BigDecimal</code>，<code>BigInteger</code>，<code>byte</code>，<code>short</code>，<code>int</code>，<code>long</code>和原始类型的相应的包装; 通过HV另外支持：任何<code>CharSequence</code>（可以被转为数字的字符串），任何的<code>Number</code>和<code>javax.money.MonetaryAmount</code>的子类型。Hibernate的元数据影响没有</p>
+</li>
+<li><p><code>@NegativeOrZero</code></p>
+<p>检查该元素是负的或零。支持的数据类型<code>BigDecimal</code>，<code>BigInteger</code>，<code>byte</code>，<code>short</code>，<code>int</code>，<code>long</code>和原始类型的相应的包装; 通过HV另外支持：任何<code>CharSequence</code>（可以被转为数字的字符串），任何的<code>Number</code>和<code>javax.money.MonetaryAmount</code>的子类型。Hibernate的元数据影响没有</p>
+</li>
+<li><p><code>@Null</code></p>
+<p>检查批注的值是 <code>null</code>。支持的数据类型：任何类型。Hibernate的元数据影响没有</p>
+</li>
+<li><p><code>@Past</code></p>
+<p>检查注释的日期是否过去。支持的数据类型<code>java.util.Date</code>，<code>java.util.Calendar</code>，<code>java.time.Instant</code>，<code>java.time.LocalDate</code>，<code>java.time.LocalDateTime</code>，<code>java.time.LocalTime</code>，<code>java.time.MonthDay</code>，<code>java.time.OffsetDateTime</code>，<code>java.time.OffsetTime</code>，<code>java.time.Year</code>，<code>java.time.YearMonth</code>，<code>java.time.ZonedDateTime</code>，<code>java.time.chrono.HijrahDate</code>，<code>java.time.chrono.JapaneseDate</code>，<code>java.time.chrono.MinguoDate</code>，<code>java.time.chrono.ThaiBuddhistDate</code>; 通过HV此外支持，如果<a href="">Joda Time</a>的日期/时间API被引入类路径：那么任何<code>ReadablePartial</code>和<code>ReadableInstant</code>的实现类都会支持。Hibernate的元数据影响没有</p>
+</li>
+<li><p><code>@PastOrPresent</code></p>
+<p>检查注释的日期是否是在过去或当前日期。支持的数据类型<code>java.util.Date</code>，<code>java.util.Calendar</code>，<code>java.time.Instant</code>，<code>java.time.LocalDate</code>，<code>java.time.LocalDateTime</code>，<code>java.time.LocalTime</code>，<code>java.time.MonthDay</code>，<code>java.time.OffsetDateTime</code>，<code>java.time.OffsetTime</code>，<code>java.time.Year</code>，<code>java.time.YearMonth</code>，<code>java.time.ZonedDateTime</code>，<code>java.time.chrono.HijrahDate</code>，<code>java.time.chrono.JapaneseDate</code>，<code>java.time.chrono.MinguoDate</code>，<code>java.time.chrono.ThaiBuddhistDate</code>; 通过HV此外支持，如果<a href="">Joda Time</a>的日期/时间API被引入类路径：那么任何<code>ReadablePartial</code>和<code>ReadableInstant</code>的实现类都会支持。Hibernate的元数据影响没有</p>
+</li>
+<li><p><code>@Pattern(regex=, flags=)</code></p>
+<p>如果被注解的字符串匹配正则表达式检查。 支持的数据类型<code>CharSequence</code>。 Hibernate的元数据影响没有</p>
+</li>
+<li><p><code>@Positive</code></p>
+<p>检查该元素是严格为正。零值被视为非法。支持的数据类型<code>BigDecimal</code>，<code>BigInteger</code>，<code>byte</code>，<code>short</code>，<code>int</code>，<code>long</code>和原始类型的相应的包装; 通过HV另外支持：任何<code>CharSequence</code>（可以被转为数字的字符串），任何的<code>Number</code>和<code>javax.money.MonetaryAmount</code>的子类型。Hibernate的元数据影响没有</p>
+</li>
+<li><p><code>@PositiveOrZero</code></p>
+<p>检查该元件是正数或零。支持的数据类型<code>BigDecimal</code>，<code>BigInteger</code>，<code>byte</code>，<code>short</code>，<code>int</code>，<code>long</code>和原始类型的相应的包装; 通过HV另外支持：任何<code>CharSequence</code>（可以被转为数字的字符串），任何的<code>Number</code>和<code>javax.money.MonetaryAmount</code>的子类型。Hibernate的元数据影响没有</p>
+</li>
+<li><p><code>@Size(min=, max=)</code></p>
+<p>检查已注释元素的大小在<code>min</code>和<code>max</code>（含）之间。支持的数据类型<code>CharSequence</code>，<code>Collection</code>，<code>Map</code>和数组。Hibernate的元数据影响：定义列长度将被设置为 <code>max</code></p>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>**</th>
+<th>上面列出的每个约束都至少有3个参数：message，groups，payload。这是Bean验证规范的要求。</th>
+</tr>
+</thead>
+<tbody><tr>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h4 id="2-3-2。-附加约束"><a href="#2-3-2。-附加约束" class="headerlink" title="2.3.2。 附加约束"></a>2.3.2。 附加约束</h4><p>除了由Bean验证API规范定义的约束，Hibernate验证提供了在下面列出了一些有用的自定义约束。这些约束适用于字段/属性的水平，仅<code>@ScriptAssert</code>是一个类级别的约束。</p>
+<ul>
+<li><p><code>@CreditCardNumber(ignoreNonDigitCharacters=)</code></p>
+<p>判断被注解的字符序列是否通过卢恩校验和测试的检查。注意，这种验证的目的是检查用户的错误，而不是信用卡的有效性！又见<a href="">解剖学信用卡号码</a>。<code>ignoreNonDigitCharacters</code>允许忽略非数字字符。默认值是<code>false</code> 。</p>
+<p>支持的数据类型<code>CharSequence</code>。 </p>
+<p>Hibernate的元数据影响没有</p>
+</li>
+<li><p><code>@Currency(value=)</code></p>
+<p>检查该注解值的货币单位。<code>javax.money.MonetaryAmount</code>是指定的货币单位的一部分。</p>
+<p>支持的数据类型任何的<code>javax.money.MonetaryAmount</code>的子类型（如果<a href="">JSR 354 API</a>或其实现在项目路径中）。</p>
+<p>Hibernate的元数据影响没有</p>
+</li>
+<li><p><code>@DurationMax(days=, hours=, minutes=, seconds=, millis=, nanos=, inclusive=)</code></p>
+<p>该被注解的<code>java.time.Duration</code>元素不大于从注解参数构成的一个过程范围。如果相等是允许的，则<code>inclusive</code>标志设置为<code>true</code>。</p>
+<p>支持的数据类型<code>java.time.Duration</code>。 </p>
+<p>Hibernate的元数据影响没有</p>
+</li>
+<li><p><code>@DurationMin(days=, hours=, minutes=, seconds=, millis=, nanos=, inclusive=)</code></p>
+<p>该被注解的<code>java.time.Duration</code>元素不小于于从注解参数构成的一个过程范围。如果相等是允许的，则<code>inclusive</code>标志设置为<code>true</code>。</p>
+<p>支持的数据类型<code>java.time.Duration</code>。 </p>
+<p>Hibernate的元数据影响没有</p>
+</li>
+<li><p><code>@EAN</code></p>
+<p>检查批注的字符序列是一个有效的<a href="https://translate.googleusercontent.com/translate_c?depth=1&hl=zh-CN&ie=UTF8&prev=_t&rurl=translate.google.co.uk&sl=en&sp=nmt4&tl=zh-CN&u=http://en.wikipedia.org/wiki/International_Article_Number_%2528EAN%2529&usg=ALkJrhhu4j_3PTtfRnDuhHEepZysGKGc5w" target="_blank" rel="noopener">EAN</a>条码。类型决定条形码类型。默认为EAN-13。</p>
+<p>支持的数据类型<code>CharSequence</code>。 </p>
+<p>Hibernate的元数据影响没有</p>
+</li>
+<li><p><code>@Length(min=, max=)</code></p>
+<p>验证该注释字符序列长度在<code>min</code>和<code>max</code>之间， 包含最大最小值。支持的数据类型<code>CharSequence</code>。 Hibernate的元数据影响：定义列长度将被设置为最大值</p>
+</li>
+<li><p><code>@CodePointLength(min=, max=, normalizationStrategy=)</code></p>
+<p>验证注释字符序列的代码点长度在<code>min</code>和<code>max</code>之间，包括最大最小值。验证标准值由<code>normalizationStrategy</code>设定。</p>
+<p>支持的数据类型<code>CharSequence</code>。</p>
+<p>Hibernate的元数据影响没有</p>
+</li>
+<li><p><code>@LuhnCheck(startIndex= , endIndex=, checkDigitIndex=, ignoreNonDigitCharacters=)</code></p>
+<p>检查该注释的字符序列中的数字传递卢恩校验和算法（也参见<a href="http://en.wikipedia.org/wiki/Luhn_algorithm" target="_blank" rel="noopener">Luhn算法</a>）。<code>startIndex</code>和<code>endIndex</code>允许仅在指定范围内的子字符串校验。<code>checkDigitIndex</code>允许于该字符序列作为校验位中使用的任意的数字。如果没有指定假设校验码在指定范围的一部分。最后但并非最不重要的，<code>ignoreNonDigitCharacters</code>可以忽略非数字字符。</p>
+<p>支持的数据类型<code>CharSequence</code>。</p>
+<p>Hibernate的元数据影响没有</p>
+</li>
+<li><p><code>@Mod10Check(multiplier=, weight=, startIndex=, endIndex=, checkDigitIndex=, ignoreNonDigitCharacters=)</code></p>
+<p>检查该注释的字符序列中的数字传递的一般模10校验和算法。<code>multiplier</code>确定用于奇数乘法器（默认为3），<code>weight</code>为偶数（默认为1）的重量。<code>startIndex</code>并<code>endIndex</code>允许运行仅在指定的子串的算法。<code>checkDigitIndex</code>允许于该字符序列作为校验位中使用的任意的数字。如果没有指定假设校验码在指定范围的一部分。最后但并非最不重要的，<code>ignoreNonDigitCharacters</code>可以忽略非数字字符。</p>
+<p>支持的数据类型<code>CharSequence</code></p>
+<p>Hibernate的元数据影响没有</p>
+</li>
+<li><p><code>@Mod11Check(threshold=, startIndex=, endIndex=, checkDigitIndex=, ignoreNonDigitCharacters=, treatCheck10As=, treatCheck11As=)</code></p>
+<p>检查该注释的字符序列中的数字传递模11校验和算法。<code>threshold</code>指定用于MOD11乘数生长的阈值; 如果没有指定值的乘数将无限增长。<code>treatCheck10As</code>和<code>treatCheck11As</code>指定的检验数字时要使用的模11的校验和等于10或11，分别。默认为X和0，分别。<code>startIndex</code>，<code>endIndex</code> <code>checkDigitIndex</code>并<code>ignoreNonDigitCharacters</code>携带相同的语义<code>@Mod10Check</code>。</p>
+<p>支持的数据类型<code>CharSequence</code></p>
+<p>Hibernate的元数据影响没有</p>
+</li>
+<li><p><code>@Range(min=, max=)</code></p>
+<p>检查注解值是否位于（含）指定的最小值和最大值之间。</p>
+<p>支持的数据类型<code>BigDecimal</code>，<code>BigInteger</code>，<code>CharSequence</code>，<code>byte</code>，<code>short</code>，<code>int</code>，<code>long</code>和原始类型的相应的包装。</p>
+<p>Hibernate的元数据影响没有。</p>
+</li>
+<li><p><code>@SafeHtml(whitelistType= , additionalTags=, additionalTagsWithAttributes=, baseURI=)</code></p>
+<p>检查注释的值是否包含潜在的恶意片段如<code>&lt;script/&gt;</code>。为了使用此约束，jsoup库必须在类路径中。通过<code>whitelistType</code>预定义的白名单类型和<code>additionalTags</code>或<code>additionalTagsWithAttributes</code>可以精确控制校验过程。前者允许添加标签没有任何属性，而后者则允许指定标签和可选允许的属性以及使用注解属性接受的协议<code>@SafeHtml.Tag</code>。此外，<code>baseURI</code>允许指定URI用于解析相对URI的基础。</p>
+<p>支持的数据类型<code>CharSequence</code>。 </p>
+<p>Hibernate的元数据影响没有</p>
+</li>
+<li><p><code>@ScriptAssert(lang=, script=, alias=, reportOn=)</code></p>
+<p>检查是否给定的脚本可以成功地对注解的元素进行评估。为了使用此约束，在Java脚本API的实现如由JSR 223（“脚本用于Java定义TM平台”）必须是类路径的一部分。待评估的表达式可以写成任何脚本或表达式语言，其中JSR 223兼容引擎可以在类路径上找到。虽然这是一类级别的约束，可以使用<code>reportOn</code>属性上的特定属性，而不是整个对象报告约束冲突。</p>
+<p>支持的数据类型任何类型。</p>
+<p>Hibernate的元数据影响没有</p>
+</li>
+<li><p><code>@UniqueElements</code></p>
+<p>检查批注的集合只包含独特的元素。判断元素是否相等使用的是<code>equals()</code>方法。默认的消息不包含重复元素的列表，但是你可以通过重写信息并使用它包含<code>{duplicates}</code>消息参数。也包括在违反约束的动态负载重复元素的列表。</p>
+<p>支持的数据类型<code>Collection</code>。 </p>
+<p>Hibernate的元数据影响没有</p>
+</li>
+<li><p><code>@URL(protocol=, host=, port=, regexp=, flags=)</code></p>
+<p>检查注释的字符序列是根据RFC2396有效的URL。如果任何可选参数<code>protocol</code>，<code>host</code>或<code>port</code>指定时，对应的URL片段必须在指定的值相匹配。可选参数<code>regexp</code>和<code>flags</code>允许指定附加的正则表达式（包括正则表达式标志），其的URL必须匹配。每默认此约束使用的<code>java.net.URL</code>构造函数来验证一个给定的字符串是否代表一个合法的URL。正则表达式基于版本也可用- <code>RegexpURLValidator</code>-其可以通过XML来配置（参见<a href="">第8.2节“经由映射约束<code>constraint-mappings</code>”</a>）或编程API（见<a href="">第12.13.2“添加约束定义编程”</a>）。</p>
+<p>支持的数据类型<code>CharSequence</code>。 </p>
+<p>Hibernate的元数据影响没有</p>
+</li>
+</ul>
+<h5 id="2-3-2-1。具体国家限制"><a href="#2-3-2-1。具体国家限制" class="headerlink" title="2.3.2.1。具体国家限制"></a>2.3.2.1。具体国家限制</h5><p>Hibernate验证还提供了一些国家的具体限制，例如对于社会安全号码的验证。</p>
+<table>
+<thead>
+<tr>
+<th>**</th>
+<th>如果你必须实现一个国家相关的特定的约束，可以考虑向Hibernate Validator提出贡献。</th>
+</tr>
+</thead>
+<tbody><tr>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<ul>
+<li><p><code>@CNPJ</code></p>
+<p>批注的字符序列代表的巴西企业纳税人登记号检查（Cadastro德佩索阿Juríeddica）支持的数据类型<code>CharSequence</code>Hibernate的元数据影响没有国家巴西</p>
+</li>
+<li><p><code>@CPF</code></p>
+<p>批注的字符序列代表巴西个体纳税人登记号检查（Cadastro德佩索阿Fídsica）支持的数据类型<code>CharSequence</code>Hibernate的元数据影响没有国家巴西</p>
+</li>
+<li><p><code>@TituloEleitoral</code></p>
+<p>被注解字符序列代表巴西选举人ID卡号码检查（<a href="https://translate.googleusercontent.com/translate_c?depth=1&hl=zh-CN&ie=UTF8&prev=_t&rurl=translate.google.co.uk&sl=en&sp=nmt4&tl=zh-CN&u=http://www.exceldoseujeito.com.br/2008/12/19/validar-cpf-cnpj-e-titulo-de-eleitor-parte-ii/&usg=ALkJrhhHHVCUUpeVpVzAxXIwMH7v3Drrng" target="_blank" rel="noopener">性标题Eleitoral</a>）支持的数据类型<code>CharSequence</code>Hibernate的元数据影响没有国家巴西</p>
+</li>
+<li><p><code>@NIP</code></p>
+<p>检查该注释字符序列代表波兰VAT标识号（<a href="https://translate.googleusercontent.com/translate_c?depth=1&hl=zh-CN&ie=UTF8&prev=_t&rurl=translate.google.co.uk&sl=en&sp=nmt4&tl=zh-CN&u=https://pl.wikipedia.org/wiki/NIP&usg=ALkJrhhg0v-xCoR1qFGHD9kzAkmmyUWHUw" target="_blank" rel="noopener">NIP</a>）支持的数据类型<code>CharSequence</code>Hibernate的元数据影响没有国家波兰</p>
+</li>
+<li><p><code>@PESEL</code></p>
+<p>检查批注的字符序列代表波兰国家识别号码（<a href="https://translate.googleusercontent.com/translate_c?depth=1&hl=zh-CN&ie=UTF8&prev=_t&rurl=translate.google.co.uk&sl=en&sp=nmt4&tl=zh-CN&u=https://pl.wikipedia.org/wiki/PESEL&usg=ALkJrhjM6oo5wSOngPLa9fFtNDXWwLG7Mg" target="_blank" rel="noopener">PESEL</a>）支持的数据类型<code>CharSequence</code>Hibernate的元数据影响没有国家波兰</p>
+</li>
+<li><p><code>@REGON</code></p>
+<p>检查该注释字符序列代表一个波兰纳税人识别号（<a href="https://translate.googleusercontent.com/translate_c?depth=1&hl=zh-CN&ie=UTF8&prev=_t&rurl=translate.google.co.uk&sl=en&sp=nmt4&tl=zh-CN&u=https://pl.wikipedia.org/wiki/REGON&usg=ALkJrhhE9cpJ9MqZ2Kw0wVL02RJHEZO4Tg" target="_blank" rel="noopener">REGON</a>）。可同时适用于9个14位版本的REGON支持的数据类型<code>CharSequence</code>Hibernate的元数据影响没有国家波兰</p>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>**</th>
+<th>在某些情况下，无论是Bean验证约束，还输Hibernate验证所提供的自定义约束，都不能满足您的要求。在这种情况下，你可以很容易地编写你自己的约束。你可以找到更多信息<a href="">第6章，<em>创建自定义的约束</em></a>。</th>
+</tr>
+</thead>
+<tbody><tr>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="https://tva3.sinaimg.cn/large/007S2YVMgy1gdzh63e589j306m06nt94.jpg" alt="ShenBing 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="https://tva2.sinaimg.cn/large/007S2YVMgy1gdzgz9aoqcj306t06rjrw.jpg" alt="ShenBing 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/04/19/Git%E7%BA%A6%E5%AE%9A/" rel="next" title="Git约定">
+                <i class="fa fa-chevron-left"></i> Git约定
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/04/19/java-concurrency/" rel="prev" title="Java 中的并发">
+                Java 中的并发 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjI3OS84ODQz"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="https://tvax4.sinaimg.cn/large/007S2YVMgy1gdzeybko09j30k10k6whg.jpg"
+                alt="ShenBing" />
+            
+              <p class="site-author-name" itemprop="name">ShenBing</p>
+              <p class="site-description motion-element" itemprop="description">唯爱与美食不可辜负</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">31</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">14</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/shenbinglife" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:shenbinglife@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Hibernate-Validator-6-0-5-Final-（一）"><span class="nav-number">1.</span> <span class="nav-text">Hibernate Validator 6.0.5.Final （一）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-开始"><span class="nav-number">1.2.</span> <span class="nav-text">1.开始</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1。-项目建立"><span class="nav-number">1.2.1.</span> <span class="nav-text">1.1。 项目建立</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-1。-统一的EL"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">1.1.1。 统一的EL</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-2。-CDI"><span class="nav-number">1.2.1.2.</span> <span class="nav-text">1.1.2。 CDI</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-3。-与安全管理器一起运行"><span class="nav-number">1.2.1.3.</span> <span class="nav-text">1.1.3。 与安全管理器一起运行</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-4。-在WildFly中更新Hibernate验证器"><span class="nav-number">1.2.1.4.</span> <span class="nav-text">1.1.4。 在WildFly中更新Hibernate验证器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-5。-在Java-9上运行"><span class="nav-number">1.2.1.5.</span> <span class="nav-text">1.1.5。 在Java 9上运行</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2。-应用约束"><span class="nav-number">1.2.2.</span> <span class="nav-text">1.2。 应用约束</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3。-验证约束"><span class="nav-number">1.2.3.</span> <span class="nav-text">1.3。 验证约束</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-4。-下一步该去哪里？"><span class="nav-number">1.2.4.</span> <span class="nav-text">1.4。 下一步该去哪里？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-声明和验证bean约束"><span class="nav-number">1.3.</span> <span class="nav-text">2.声明和验证bean约束</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1。-声明bean约束"><span class="nav-number">1.3.1.</span> <span class="nav-text">2.1。 声明bean约束</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-1。-字段级别约束"><span class="nav-number">1.3.1.1.</span> <span class="nav-text">2.1.1。 字段级别约束</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-2。-属性级别约束"><span class="nav-number">1.3.1.2.</span> <span class="nav-text">2.1.2。 属性级别约束</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-3。-容器元素约束"><span class="nav-number">1.3.1.3.</span> <span class="nav-text">2.1.3。 容器元素约束</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-1-3-1。-使用Iterable"><span class="nav-number">1.3.1.3.1.</span> <span class="nav-text">2.1.3.1。 使用Iterable</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-1-3-2。-与List"><span class="nav-number">1.3.1.3.2.</span> <span class="nav-text">2.1.3.2。 与List</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-1-3-3。-与Map"><span class="nav-number">1.3.1.3.3.</span> <span class="nav-text">2.1.3.3。 与Map</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-1-3-4。-用java-util-Optional"><span class="nav-number">1.3.1.3.4.</span> <span class="nav-text">2.1.3.4。 用java.util.Optional</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-1-3-5。-使用自定义容器类型"><span class="nav-number">1.3.1.3.5.</span> <span class="nav-text">2.1.3.5。 使用自定义容器类型</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-1-3-6。-嵌套的容器元素"><span class="nav-number">1.3.1.3.6.</span> <span class="nav-text">2.1.3.6。 嵌套的容器元素</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-4。-类级别约束"><span class="nav-number">1.3.1.4.</span> <span class="nav-text">2.1.4。 类级别约束</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-5。-约束继承"><span class="nav-number">1.3.1.5.</span> <span class="nav-text">2.1.5。 约束继承</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-6。-对象级联校验"><span class="nav-number">1.3.1.6.</span> <span class="nav-text">2.1.6。 对象级联校验</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2。-验证Bean约束"><span class="nav-number">1.3.2.</span> <span class="nav-text">2.2。 验证Bean约束</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-1。-获取Validator实例"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">2.2.1。 获取Validator实例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-2。-验证方法"><span class="nav-number">1.3.2.2.</span> <span class="nav-text">2.2.2。 验证方法</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-2-2-1。-Validator-validate"><span class="nav-number">1.3.2.2.1.</span> <span class="nav-text">2.2.2.1。 Validator#validate()</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-2-2-2。-Validator-validateProperty"><span class="nav-number">1.3.2.2.2.</span> <span class="nav-text">2.2.2.2。 Validator#validateProperty()</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-2-2-3。-Validator-validateValue"><span class="nav-number">1.3.2.2.3.</span> <span class="nav-text">2.2.2.3。 Validator#validateValue()</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-3。-ConstraintViolation"><span class="nav-number">1.3.2.3.</span> <span class="nav-text">2.2.3。 ConstraintViolation</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-2-3-1。ConstraintViolation方法"><span class="nav-number">1.3.2.3.1.</span> <span class="nav-text">2.2.3.1。ConstraintViolation方法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-2-3-2。-利用属性路径"><span class="nav-number">1.3.2.3.2.</span> <span class="nav-text">2.2.3.2。 利用属性路径</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3。-内置的约束"><span class="nav-number">1.3.3.</span> <span class="nav-text">2.3。 内置的约束</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-1。-Bean验证约束"><span class="nav-number">1.3.3.1.</span> <span class="nav-text">2.3.1。 Bean验证约束</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-2。-附加约束"><span class="nav-number">1.3.3.2.</span> <span class="nav-text">2.3.2。 附加约束</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-3-2-1。具体国家限制"><span class="nav-number">1.3.3.2.1.</span> <span class="nav-text">2.3.2.1。具体国家限制</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ShenBing</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
